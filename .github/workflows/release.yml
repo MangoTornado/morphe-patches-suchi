@@ -37,7 +37,9 @@ jobs:
       - name: Verify tests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :patches:test --no-daemon
+        run: |
+          ./gradlew :patches:test --no-daemon
+          ./gradlew clean --no-daemon
 
       - name: Verify signing configuration
         env:
