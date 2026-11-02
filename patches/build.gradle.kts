@@ -1,14 +1,13 @@
-group = "app.template"
+group = "suchi.morphe"
 
 patches {
-    // TODO: Update this section with your project details.
     about {
-        name = "UserXYZ Patches"
-        description = "Patches for apps I like"
-        source = "git@github.com:UserXYZ/morphe-patches.git"
-        author = "Awesome dev"
+        name = "Suchi Patches"
+        description = "Patches for use with Morphe"
+        source = "git@github.com:MangoTornado/morphe-patches-suchi.git"
+        author = "MangoTornado"
         contact = "na"
-        website = "na"
+        website = "https://github.com/MangoTornado/morphe-patches-suchi"
         license = "GPLv3"
     }
 }

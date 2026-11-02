@@ -1,18 +1,16 @@
-# 👋🧩 Morphe Patches template
+# 🧩 Suchi Patches
 
-Template repository for Morphe Patches.
+Patches for use with [Morphe](https://morphe.software).
 
 ## ❓ About
 
-Patches for apps I like.
-
-<!-- TODO: Update this about section with a brief introduction/summary about this repo and what it offers. -->
+A personal collection of Morphe patches. This project is not affiliated with the Morphe project.
 
 ### How to use these patches
 
-Click the button below, or manually add this repo url to Morphe Manager: https://github.com/xyz-user/xyz-patches
+Click the button below, or manually add this repo url to Morphe Manager: https://github.com/MangoTornado/morphe-patches-suchi
 
-<a href="https://morphe.software/add-source?github=xyz-user/xyz-patches">
+<a href="https://morphe.software/add-source?github=MangoTornado/morphe-patches-suchi">
   <img src=".github/assets/add-to-morphe.svg" alt="Add to Morphe" height="48">
 </a>
 
@@ -100,4 +98,4 @@ See the [Morphe documentation](https://github.com/MorpheApp/morphe-documentation
 
 ## 📜 License
 
-UserXYZ Patches are licensed under the [GNU General Public License v3.0](LICENSE)
+Suchi Patches are licensed under the [GNU General Public License v3.0](LICENSE)
