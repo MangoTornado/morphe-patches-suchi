@@ -18,6 +18,16 @@ The incoming trace identified 37 containing nodes for `UserShareds.l`, including
 
 The experimental, disabled-by-default **Enable local Premium controls** patch targets only version `1.23.0`. It makes these three getters return `true`, `Boolean.TRUE` and `PremiumState.PREMIUM`. It validates the two profile field references before mutation. The patch does not write profile fields, preferences, purchase receipts or server-side account entitlement.
 
+The getters also affect behavior outside UI gates. `ThirdPartySdkManager.b` reads `UserShareds.l()` when building AppsFlyer's login event property `user_type`, so enabling the local Premium patch changes that classification. This is a static data-flow finding, not an observed event transmission. Evidence: `ev_38c9de6a8ce799b68c2eb235c5c0b6aa0de5adf238c7fc688794bd67d1a38556`.
+
+`AmplitudeExtKt$setLoginInfo$1$1` reads the unchanged server `AmplitudeResponse` for its Identify properties. Its `MeData.t()` call instead gates a local FREE-to-non-FREE cache reconciliation; the Premium getter override suppresses that branch. The inspected RevenueCat login and customer-attribute builder still uses the original user ID, email, username and language fields without reading these Premium getters. Unchanged purchase/authentication source does not establish that every outgoing value is unchanged. Evidence: `ev_f7c5fba04201dd1836f7a859da79c28675cfcd0afc101807e5ab6701dee059d1`.
+
+Trial and gift flows also use separate inputs. `FinishSubscriptionViewModel.h` reads the original `freeTrial` field without calling the overridden getters. Invitation-code visibility requires its original eligibility flag and a FREE state; the override changes the latter condition. Gift-specific subscription navigation consumes the overridden state, while gift-invitation eligibility still also requires its original flag and a positive remaining count. These are static branch findings; gift/trial expiry enforcement and network behavior remain unobserved. Evidence:
+`ev_fd50bfda4ad856159761b064509318dcf8f6be64d8002cdec0c70c28108d0ac6`,
+`ev_916b1fb246af0d8ac79ec459543a8ba88bc153320de76c0970ca804f9e2c7e08`,
+`ev_41afcb4d79c7b88e9fecda9dbb633a9f2cf7fce47f412ce1835b0b8b5a930a75`,
+`ev_b6f0fdb7fed73bd8575dbcb5221eb141653d731903fccd783a36330bfec86357`.
+
 `PremiumRepositoryImpl.h` sends a `SendPurchaseSubscriptionRequest` through `TeuidaAPI.V` with authentication headers. A separate backend purchase path therefore exists. Static inspection does not establish its validation rules, whether downloaded content has further checks, or the behavior of inconsistent trial, gift and expiry fields. Device testing with developer-provided free and entitled accounts is required.
 
 ## MicroG applicability
@@ -37,6 +47,8 @@ The combined local Premium + MicroG candidate compiled with Kotlin 2.4.21 and Mo
 ## Evidence
 
 Canonical records are exported locally at `/private/tmp/teuida-research/evidence.json`; the base APK and identity file are in that directory. No app account or live purchase service was used. The later offline emulator checks are recorded separately in [validation results](validation.md).
+
+The additional app-level findings and method evidence are retained privately as `app-level-findings.md` and `app-level-evidence.json` in the same directory. They were obtained from the supplied artifact without a source map or developer test build.
 
 | Observation | REA evidence ID |
 | --- | --- |

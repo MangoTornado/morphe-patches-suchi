@@ -44,9 +44,11 @@ The optional **Show reading download errors** patch adds these details to that d
 - The actual Volley error class.
 - HTTP status when the error retains a network response.
 - Response byte count and MIME type, when available.
-- The immediate cause's class, when available.
+- Up to four cause classes and three method locations per throwable, when available.
 
-It excludes URLs, response contents, token values and exception messages. The details are consumed once on the callback thread; other dialog messages retain their original text. It changes neither requests nor entitlement.
+Method locations contain only validated class and method names and positive line numbers. Missing line numbers do not prevent displaying the method. Cause cycles and longer chains are marked as omitted.
+
+It excludes URLs, response contents, token values, exception messages, filenames and suppressed exceptions. The details are consumed once on the callback thread; other dialog messages retain their original text. It changes neither requests nor entitlement.
 
 To reproduce, refresh the Suchi source in Morphe, patch the original Du Chinese 3.6.1 APK with **Show reading download errors** enabled, and reopen the failing premium reading. Share the dialog details with the developer.
 
@@ -60,6 +62,11 @@ An HTTP 401 or 403 warrants checking authorization, account entitlement and the 
 | `f5.t` | Socket timeout |
 | `f5.l` | No HTTP response object; may retain an I/O cause |
 | `f5.j` | Response bytes unavailable; metadata may be absent |
+| `f5.u` | The network dispatcher wraps an unexpected exception with its cause, without attaching response metadata |
+
+On 2026-11-02, the user reported `f5.u`, no attached response and an immediate `java.lang.RuntimeException` cause. The original dispatcher `f5.i.d` catches unexpected exceptions across request execution, response parsing and cache handling. Its wrapper therefore does not prove that no response arrived. Evidence: `ev_ce8c923cd0b791786016d2e0ba8c819576f612b70d5fb98050f363cdf3dba043`.
+
+One original branch, `g5.l.e`, wraps `MalformedURLException` in `RuntimeException` before the dispatcher wraps it again. This is a candidate explanation, not an observed device cause. The extended diagnostics can distinguish it using the nested cause and method location without exposing the request URL. Evidence: `ev_f32eca6a89076556e4389903d94e2ce1e9c7f9a34a3275455f9377e61e341143`.
 
 Invalid reading JSON uses the separate invalid-lesson dialog. The earlier `xb.a.c` downloader finding concerns audio and does not establish the reading-text failure.
 
@@ -93,6 +100,6 @@ The patched base APK and supplied splits installed on an isolated Android 37 emu
 
 ## Validation
 
-All three Du Chinese patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied together to the original base APK, and produced verified DEX and resources with no hierarchy findings. The Gradle build, seven JUnit tests and bundle loader checks passed.
+All three Du Chinese patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied together to the original base APK, and produced verified DEX and resources with no hierarchy findings. The current Gradle build, fourteen JUnit tests and bundle loader checks passed.
 
-The diagnostics APK installed with the original supplied splits and reached `MainActivity` on an offline Android 35 emulator without a package crash. An Android test using the APK's real Volley classes verified synthetic HTTP 403 metadata, a DNS cause class, and the actual callback's null-fragment cleanup. These fixtures contacted no backend and do not identify the reported device failure. See [validation results](validation.md).
+The v1.1.0 diagnostics APK installed with the original supplied splits and reached `MainActivity` on an offline Android 35 emulator without a package crash. An Android test using the updated APK's real Volley classes verified synthetic HTTP 403 metadata, a DNS cause class, the original malformed-URL wrapper's nested cause and location, and the actual callback's null-fragment cleanup. These fixtures contacted no backend and do not identify the reported device failure. See [validation results](validation.md).

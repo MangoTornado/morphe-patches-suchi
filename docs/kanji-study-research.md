@@ -247,17 +247,51 @@ Retained REA evidence:
 `ev_9ce215ada68711545439779f22e9dee747c4c0cb113ce314342d8efcb96bebd9`
 (`zb2.b`, response-status comparison).
 
+Further static inspection connects six product preferences to their purchase
+screens: Upgrade (`r13.o8`), Memorize (`r13.H8`), two Outlier instances
+(`r13.r8`, `r13.v8`) and two KLC instances (`r13.z8`, `r13.D8`).
+Their initializer preference-key selectors are respectively `U+3717`,
+`U+373D`, `U+371D`, `U+3725`, `U+372D` and `U+3735`; plaintext names
+and product identifiers remain unknown. These associations were checked
+against the complete initializer and raw method descriptors.
+
+The Memorize setting controls an additional query fragment in `m22.f()I`
+(a local `MemorizeInfo` count) and `m22.z(I)Ljava/util/ArrayList;`
+(a local Kanji query). The fragment's plaintext is unresolved, so no numerical
+free-tier limit is inferred. `s13.t()Z` combines the two Outlier preferences
+with logical OR. Purchase JSON parsing in `n53.f()` accepts an optional product
+array or a single product string; its numeric and boolean readers have
+identified defaults, but their textual keys and field meanings remain unresolved.
+Evidence:
+`ev_dec365be98b5176a1403acb4ccf62c37893dfdf53aa5434746938fccab43498e`,
+`ev_457b7edead742922afea0fe9b36afdf0ae6f8d38a2b04370f9d9ae41d901d7d2`,
+`ev_249ec9f6a0707c27b028a85945014e06973bba5c90a0e2a4530a516467b51b3b`,
+`ev_91e0ac862dfab21293bc4ab16068ecf102acc7118f8ab21bd2c7d22391ce24ca`,
+`ev_61bee30aaa789b1ecbef79523243bfafb989ee83e0a85c1d89ebaab9cc05c43b`.
+
 ## Google paths and patch feasibility
 
+`GoogleDriveActivity.onCreate` reads its selected account from the string
+preference `r13.D7` when there is no saved state. A nonempty account enters
+the credential setup path; the account-result callback has not been expanded.
 `GoogleDriveActivity.l()` resolves member 9623 to
 `GoogleAccountCredential.usingOAuth2(Context, Collection)` and member 18594 to
 `setSelectedAccountName(String)`. It builds a Google Drive client with the
-credential, `NetHttpTransport` and `GsonFactory`. This establishes an active
-Google OAuth2 path. Its account selection, availability checks, auth-token
-transport and behavior with MicroG have not been validated. The observed
+credential, `NetHttpTransport` and `GsonFactory`. Its installed request handler
+obtains a token through `bb1.b(context, accountName, scope)` and adds a decoded
+prefix plus that token to the HTTP Authorization header. On its first HTTP 401,
+the response handler passes the stored token to `bb1.a` and returns true;
+that helper's downstream operation remains uninspected. This establishes a
+connected application account/token path. The plaintext scope, account type
+and header prefix remain unresolved, and Google/MicroG behavior has not been
+validated at runtime. The observed
 `onActivityResult` file-URI handling alone is not a Google sign-in callback.
 Evidence:
-`ev_cadfcf903ffd1b5f8cb6378d609c36eb8a4fe4369b651319c9e0a82bfb4b4eb9`.
+`ev_751c84f1d00b97818fbe41995846bfa695a5fe95780d120cdc19e1d3a9f9ef1c`,
+`ev_cadfcf903ffd1b5f8cb6378d609c36eb8a4fe4369b651319c9e0a82bfb4b4eb9`,
+`ev_88a58b168a665afcc2b29a6a5d9d97d8316119bdc5bd0965187312ac2212bc13`,
+`ev_18c292fb9a384934e5a1b8f4ee572e65d1dd5c6eaf5a28b1466441405037cd08`,
+`ev_65f1966241a9f2d9d9f5ddbdd0fbe62e726d00eed06cd9ebed77dfaa717eafef`.
 The earlier app-owned FCM preference entry point remains visible; registration
 and delivery require a runtime test.
 
@@ -310,3 +344,8 @@ The private evidence ledgers, input verification, native snapshot, record
 decoders, member parser and DEX structural checks are retained in
 `/private/tmp/kanji-study-research/`. No APK, content database or decompiled app
 source is included in this repository.
+
+The app-level follow-up's exact descriptors, selector associations and exported
+method evidence are retained under `app-static-followup/` in that private
+directory. It used the existing analysis-only inspection APK and changed no
+APK, native integration candidate or runtime state.
