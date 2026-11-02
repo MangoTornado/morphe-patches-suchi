@@ -82,6 +82,8 @@ A separate WorkManager 2.9.0 START_FOREGROUND Runnable/listener fragment passes 
 
 This fragment requires the normal concrete `WorkManagerTaskExecutor` constructor contract. Its listener carrier differs from the original dispatcher; callback behavior is compared. Processor, coroutine and map dependencies are fixtures, with no Android runtime or real scheduler used. It is not a replacement for the complete service callback: STOP singleton state has no retained mapping, and lifecycle behavior remains unsupported. Evidence is retained privately under `.research-tools/artifacts/pimsleur-workmanager-start-2026-11-02/`.
 
+A separate public-source study passes 45 STOP, restart, teardown and routing cases using nine unchanged WorkManager 2.9.0 methods. It verifies the API 26 foreground boundary, singleton clearing, dispatcher replacement, cancellation under the lock, listener removal and injected failure states. Initialization and framework/scheduler dependencies remain fixtures; the application's optimized STOP singleton and lifecycle mapping are still unknown. See [research tool validation](tool-validation.md) for scope and provenance.
+
 ## Validation
 
 The combined local Premium + MicroG patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX, compiled resources and the modified Hermes asset. SDK DEX verification found the same 58 optional-dependency hierarchy findings in the original and patched APK; no findings were added. Protocol-routing and compiled manifest checks passed. The raw asset is exported as `other-resources/assets/index.android.bundle` for APK assembly, separately from `resources.apk`.
