@@ -29,7 +29,7 @@ Both patches are disabled by default and target only the inspected version, mark
 
 Offline checks compiled the patch sources with Kotlin 2.4.21 and Morphe Patcher 2.1.0. Pro-state and protocol-routing tests passed. Both patches applied to the original base APK and produced DEX and resources. SDK DEX verification found the same 176 optional-dependency hierarchy findings in the original and patched APK; no findings were added.
 
-Full Gradle bundle packaging remains pending because the agent sandbox blocks Gradle's local cache-lock socket. No patched APK was installed, and no live entitlement endpoint was called.
+The packaged `.mpp` passed loader checks. The full Gradle task graph remains pending because the agent sandbox blocks Gradle's local cache-lock socket. No patched APK was installed, and no live entitlement endpoint was called.
 
 ## Developer verification
 

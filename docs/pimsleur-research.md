@@ -1,6 +1,6 @@
 # Pimsleur static research
 
-Inspected on 2026-11-02 with REA and its JADX provider, reported version `0.7.1`. The original workspace archive was preserved. Only its extracted base APK was analyzed; split APK behavior, publisher identity, native libraries, device behavior and backend enforcement were not verified. APK signature verification passed during output checks.
+Inspected on 2026-11-02 with REA/JADX (reported provider version `0.7.1`) and a bounded offline Hermes v96 reader. The original workspace archive was preserved. Findings describe the extracted base APK and its shipped bytecode; publisher identity, device behavior and backend enforcement were not verified. APK signature verification passed during output checks.
 
 | Artifact | Value |
 | --- | --- |
@@ -10,34 +10,33 @@ Inspected on 2026-11-02 with REA and its JADX provider, reported version `0.7.1`
 | Archive SHA-256 | `290e073e95492c70008bc7d8fd0ea874a7a6cccd20547d165cdcd6db5ec5a065` |
 | Base APK SHA-256 | `15629eef999249cd02e79e8af056df9272551ce82126993480130811a68ffef9` |
 
-## Premium and billing
+## Recovered local Premium controls
 
-The native class inventory contains React Native application classes and Pimsleur bridges for authentication, media, encryption and Android Auto. Local ZIP inspection also found the 8,269,940-byte `assets/index.android.bundle`; its first twelve bytes are `c6 1f bc 03 c1 03 19 1f 60 00 00 00`, consistent with Hermes bytecode version 96. This bundle was extracted but not decompiled. The bounded native investigation did not establish a local Premium predicate, so no Premium patch is provided.
+The app uses React Native and an 8,269,940-byte Hermes v96 `assets/index.android.bundle`, SHA-256 `00de65410c84a4907be54bfe11d211b8a7f5e868264f7e924af9398131fec0c5`. Its SHA-1 footer verifies. Offline decoding recovered all 64,230 strings and 49,524 function headers covering 37,660 distinct bodies. All bodies decoded with the version-specific opcode definitions, without unknown opcodes, truncated operands or out-of-range string/function references. Original JavaScript source was not reconstructed.
 
-The base APK packages Google Play Billing, Nitro React Native IAP and OpenIAP classes, including active-subscription and receipt-validation models. Their presence does not establish which purchase path runs or whether a server verifies entitlement. `NativeLoginModule.exchangeTokens` calls Auth0's native social token exchange with an audience and scope. That is evidence of a remote authentication path, not proof of Premium validation.
+| Function | ID | Byte offset / size | Recovered decision |
+| --- | ---: | --- | --- |
+| `isPU` | `7158` | `3521571 / 41` | Reads `entities.productInfo[0].isPU`, defaulting to false. |
+| `getPremiumStatus` | `7169` | `3522424 / 84` | Reads `languagePicker.selectedProduct.isPU`; when `isAllAccess`, reads `languagePicker.allAccessSelectLanguageLevel.isPremium`. Both default to false. |
+| `isSupportPremiumFeature` | `27725` | `5515916 / 534` | Consumes `isPU`, `isFreeLesson`, reading and bonus-pack state, then branches to a not-available modal. |
 
-To establish a patchable gate, inspect the developer's matching JavaScript source or the Hermes bytecode with a compatible decoder, then follow the entitlement response into the actual content decision. A developer test account and controlled runtime capture would distinguish locally gated content from server-controlled downloads.
+Module function `7106` creates and exports the first two selectors. There are 107 typed instruction references to `isPU`, including reads in Premium feature, AI feature and UI code; this count includes property definitions and does not establish 107 runtime calls. `getPremiumStatus` has two export-property references, so its runtime consumers remain less certain.
 
-## Hermes follow-up
+The experimental, disabled-by-default **Enable local Premium controls** patch targets version `8.1` and requires the exact original Hermes bundle hash. It replaces only the two selector bodies with `LoadConstTrue r0; Ret r0`, fills the remaining body bytes with `Unreachable`, and repairs the footer. The bodies are not shared with other function headers. The patch does not mutate stored entitlement, receipt data, authentication or backend request builders. Other checks, including bonus packs, free lessons and AI availability, remain relevant.
 
-The extracted bundle's SHA-256 is `00de65410c84a4907be54bfe11d211b8a7f5e868264f7e924af9398131fec0c5`. Its trailing 20 bytes match the SHA-1 of the preceding bytes, consistent with the footer checked by the workspace's Morphe Hermes helper.
+Both an independently derived bundle and the actual patcher output pass structural verification: 128 differing bytes fall entirely within the two bodies and the footer, all 37,658 other distinct function bodies and all headers/tables remain unchanged, and both replacement bodies decode to return true with valid unreachable padding. Its SHA-256 is `30a659353cf17666a027c038ea47262427ede69c2d15992ceebcc561379a7cb4`. This verifies the bytecode change, not device execution or content access.
 
-No `hermes`, `hermesc`, `hbcdump`, `hermes-dec` or `hbc-disassembler` executable was found on the current PATH; bounded workspace and installed-tool searches found no compatible decoder. REA `6.7.0` advertises source JavaScript and PE/CLI managed analysis, but no Hermes bytecode decoder. Its source JavaScript recovery tool expects UTF-8 JavaScript and cannot decode this binary bundle. The existing Morphe `hermesPatch` helper validates magic/version, replaces supplied byte patterns and repairs the footer; it does not recover string tables, function tables or instructions.
+## Purchase and server boundary
 
-Raw byte searches found these useful anchors. Offsets are decimal bytes from the bundle's beginning. These are substrings in packed storage, not decoded string entries; adjacent bytes can belong to unrelated strings.
+Decoded function `18183` creates a `@@purchase/verifyReceiptViaBackend` action using request-builder function `18189`. That builder constructs `POST /account/{customerId}/receipt` with `productId`, `transactionId`, `originalMessage`, `transactionResult`, `receipt`, `storeDomain`, `isMultiple` and `appVersion`. `verifyTransaction` (`18191`) selects this action on Android; a separate builder handles restore requests.
 
-| Raw substring | Byte offset |
-| --- | ---: |
-| `@@purchase/verifyReceiptViaBackend` | `1401946` |
-| `Products.entitlementExpired` | `1447722` |
-| `checkEntitlementAfterExternalPurchase` | `1797518` |
-| `getSubscriptionStatus` | `1836010` |
-| `noEntitlementExpiredPopup` | `1931045` |
-| `hasAccessToAiProduct` | `2009857` |
-| `hasActiveSubscriptions` | `2009877` |
-| `isSubscribed` | `2018550` |
+These are recovered request definitions and platform branches. No request was sent, no receipt was forged, and backend acceptance rules or download controls were not observed. Google Play Billing, Nitro IAP and OpenIAP are packaged; native `NativeLoginModule.exchangeTokens` also uses Auth0. A developer-controlled free/entitled account comparison is still needed to establish behavior after the local selectors change.
 
-These names suggest useful purchase and access-state investigation points, but no consuming function or branch was recovered. They do not establish a local gate, a receipt-validation request, server enforcement or an active execution path. The next required input is a Hermes **version 96-compatible** reader that exposes string IDs, function headers and instruction operands, or the developer's matching `8.1` JavaScript/Metro source map. An entitlement response schema and expected free/paid behavior would help interpret the recovered decision. No tool was installed and no bundle bytes were changed.
+## Decoder provenance
+
+REA `6.7.0` has no advertised Hermes decoder. A cached `hermesc` reports HBC v98 and rejects the original v96 file; changing only a private inspection copy's version header also fails deserialization. Neither output was used as control-flow evidence.
+
+The successful reader uses verified upstream schema and v96 opcode references from `P1sec/hermes-dec`, pinned commit `2e796663e1fedb93dca51060797ebf3327b3fedb`. Reference documents were retrieved read-only and checked against upstream Git blob hashes. Retrieved Python modules were parsed as AST data, never imported or executed. The private utility and AGPL-3.0 reference notices remain outside the public patch repository. No source map, target-code execution or live service was required to recover the bytecode.
 
 ## MicroG applicability
 
@@ -49,11 +48,13 @@ The shared **MicroG integration** patch targets only inspected version `8.1`, ma
 
 ## Validation
 
-The MicroG patch compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX and resources. SDK DEX verification found the same 58 optional-dependency hierarchy findings in the original and patched APK; no findings were added. Protocol-routing tests passed. Full Gradle bundle packaging and device testing remain pending; see [validation results](validation.md).
+The combined local Premium + MicroG patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX, compiled resources and the modified Hermes asset. SDK DEX verification found the same 58 optional-dependency hierarchy findings in the original and patched APK; no findings were added. Protocol-routing and compiled manifest checks passed. The raw asset is exported as `other-resources/assets/index.android.bundle` for APK assembly, separately from `resources.apk`.
+
+A second patcher run rejected a changed Hermes asset with the same app version before mutation. The packaged `.mpp` passed loader checks; the full Gradle task graph and device testing remain pending. See [validation results](validation.md).
 
 ## Evidence
 
-Canonical records are exported locally at `/private/tmp/pimsleur-research/evidence.json`; extracted identity and bytecode are in that directory. Supplemental ZIP, byte-level and tool-inventory observations are recorded in `/private/tmp/pimsleur-research/hermes-raw-findings.json`, separate from the REA records.
+Canonical REA records are exported locally at `/private/tmp/pimsleur-research/evidence.json`. Hermes findings are supplemental analyst decoding, separate from those records: `hermes-v96-tables.json`, `hermes-v96-decode-summary.json`, `hermes-v96-string-references.json`, `hermes-v96-selected-functions.txt`, `hermes-v96-backend-and-gate-functions.json` and `hermes-v96-premium-verification.json` in the same directory. Primary reference provenance is in the workspace `.research-tools/hermes-v96-source-references.json`.
 
 | Observation | REA evidence ID |
 | --- | --- |

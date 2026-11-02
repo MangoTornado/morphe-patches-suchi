@@ -65,4 +65,4 @@ The patch requires the matching MicroG provider to be installed. FCM delivery, a
 
 ## Validation
 
-The local-controls and MicroG patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX and resources. SDK DEX verification passed with no hierarchy findings. Protocol-routing tests also passed. Full Gradle bundle packaging and device behavior remain pending; see [validation results](validation.md).
+The local-controls and MicroG patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX and resources. SDK DEX verification passed with no hierarchy findings. Protocol-routing tests also passed. The packaged `.mpp` passed loader checks; the full Gradle task graph and device behavior remain pending. See [validation results](validation.md).

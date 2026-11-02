@@ -17,6 +17,8 @@ import com.android.tools.smali.dexlib2.util.MethodUtil
 import suchi.morphe.patches.renshuu.renshuuCompatibility
 import suchi.morphe.patches.duchinese.duChineseCompatibility
 import suchi.morphe.patches.pimsleur.pimsleurCompatibility
+import suchi.morphe.patches.teuida.patchTeuidaCredentialManager
+import suchi.morphe.patches.teuida.teuidaCompatibility
 
 private data class MicroGTarget(
     val compatibility: Compatibility,
@@ -30,6 +32,7 @@ private val targets = listOf(
     MicroGTarget(renshuuCompatibility),
     MicroGTarget(duChineseCompatibility, "LY5/n;", "f", "LY5/k;", "h"),
     MicroGTarget(pimsleurCompatibility),
+    MicroGTarget(teuidaCompatibility),
 )
 
 @Suppress("unused")
@@ -87,6 +90,10 @@ val microGSupportPatch = bytecodePatch(
         }
         if (gmsPackageReferences == 0) {
             throw PatchException("Google Play Services package references were not found.")
+        }
+
+        if (target.compatibility.packageName == teuidaCompatibility.packageName) {
+            patchTeuidaCredentialManager(this)
         }
 
         availabilityMethod.addInstructions(0, "const/4 v0, 0x0\nreturn v0")

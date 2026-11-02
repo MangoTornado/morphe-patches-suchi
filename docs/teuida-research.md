@@ -1,6 +1,6 @@
 # TEUIDA static research
 
-Inspected on 2026-11-02 with REA and its JADX provider, reported version `0.7.1`. The original workspace archive was preserved. Only its extracted base APK was analyzed; split APK behavior, signatures, native libraries, device behavior and backend enforcement were not verified.
+Inspected on 2026-11-02 with REA and its JADX provider, reported version `0.7.1`. The original workspace archive was preserved. Its extracted base APK passed signature verification during output checks; publisher identity, split APK behavior, native libraries, device behavior and backend enforcement were not verified.
 
 | Artifact | Value |
 | --- | --- |
@@ -28,11 +28,11 @@ The app's `GoogleSignInHelperKt.b` uses **Credential Manager**, `GetSignInWithGo
 
 Native messaging is app-used: `FirebaseMessaging.getToken` has callers in `net.teuida.teuida.fcm.FcmTokenProvider.a` and `tech.notifly.utils.NotiflyFirebaseUtil.getFcmToken`. Messaging can be researched independently of the unresolved Credential Manager route. Google Play Billing's `com.android.vending` route must stay intact.
 
-The [Credential Manager follow-up](teuida-microg-research.md) identifies provider eligibility, credential-type mapping and SDK backend-selection requirements. No TEUIDA MicroG patch is included.
+The experimental, disabled-by-default **MicroG integration** candidate now includes TEUIDA `1.23.0`. It maps the exact Google credential type to the MicroG provider capability, permits a non-system provider only for the Google sign-in option, and preserves the older `getSignInIntent` route in the Play Services fallback. Google ID bundle keys and Google Play Billing routing stay intact. On Android API 34+, the user must enable the MicroG Google ID credential provider. The [Credential Manager follow-up](teuida-microg-research.md) records the exact hooks and remaining device-verification requirements.
 
 ## Validation
 
-The local Premium patch compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX. SDK DEX verification found the same 1,938 optional-dependency hierarchy findings in the original and patched APK; no findings were added. Full Gradle bundle packaging and device testing remain pending; see [validation results](validation.md).
+The combined local Premium + MicroG candidate compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX and compiled resources. SDK DEX verification found the same 1,938 optional-dependency hierarchy findings in the original and patched APK; no findings were added. Separate compiled-output checks verified the credential type constant/literals, provider flags, older backend selection, and unchanged Google ID bundle keys. Compiled manifest and signer metadata checks passed. The packaged `.mpp` passed loader checks; the full Gradle task graph and device testing are tracked in [validation results](validation.md).
 
 ## Evidence
 

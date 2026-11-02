@@ -22,8 +22,8 @@ These patches are experimental and disabled by default. Select them explicitly f
 | --- | --- | --- | --- |
 | [renshuu](docs/renshuu-research.md) | 1.2.20260311 | Pro, Reading Buddy and Text Analyzer menus | Native routing |
 | [Du Chinese](docs/du-chinese-research.md) | 3.6.1 | Subscription controls and next-lesson gate | Native routing |
-| [TEUIDA](docs/teuida-research.md) | 1.23.0 | Premium getters | [Credential Manager investigation](docs/teuida-microg-research.md) |
-| [Pimsleur](docs/pimsleur-research.md) | 8.1 | Hermes investigation | Native routing |
+| [TEUIDA](docs/teuida-research.md) | 1.23.0 | Premium getters | [Native and Credential Manager routing](docs/teuida-microg-research.md) |
+| [Pimsleur](docs/pimsleur-research.md) | 8.1 | Two Hermes Premium selectors | Native routing |
 | [Kanji Study](docs/kanji-study-research.md) | 7.8.3 | Protected-code investigation | Protected-code investigation |
 
 Local overrides do not alter server account entitlements. MicroG routing targets `app.revanced.android.gms`; device login and notification delivery remain unverified. The reports describe each patch's scope and the remaining developer checks.

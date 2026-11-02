@@ -1,6 +1,6 @@
 # TEUIDA Credential Manager / MicroG research
 
-Static inspection on 2026-11-02 found that package/action routing, original signer metadata, and a Play Services availability override do **not** cover TEUIDA's complete Google sign-in flow. TEUIDA MicroG support remains research only. No TEUIDA MicroG patch was added, APK executed, account used, or service contacted.
+Static inspection on 2026-11-02 found that package/action routing, original signer metadata, and a Play Services availability override do **not** cover TEUIDA's complete Google sign-in flow. The experimental, disabled-by-default **MicroG integration** candidate now includes TEUIDA `1.23.0` with additional credential hooks. No APK was executed, account used, or service contacted; device sign-in remains unverified.
 
 ## Inspected inputs
 
@@ -57,13 +57,27 @@ The newer identitycredentials backend **exists in this local tree**. Its presenc
 
 Protocol bundle keys should retain their `com.google.android.libraries.identity.googleid` names. TEUIDA's `GoogleIdTokenCredential.Companion.createFrom` reads exactly those keys, including a parcelable `Uri` for the profile image. The native MicroG provider supplies a parcelable URI; the newer chooser currently writes that field as a string at line 228. Image-field conversion on each Android API remains a compatibility question. [E12]
 
-## Candidate fixes and verification still required
+## Implemented candidate and verification still required
 
-For the API 34+ framework route, a narrowly scoped candidate would change only the Google credential request/response type to the matching MicroG vendor capability and clear `isSystemProviderRequired` for that Google option. The Android credential-provider setting must include MicroG's Google ID provider. The service class still has its `com.google.android.gms...GoogleIdService` name; it should not be renamed simply because the installed package uses a vendor namespace. Empty `allowedProviders` is already permissive; adding a component allowlist does not make a disabled or system-restricted provider eligible.
+`patches/src/main/kotlin/suchi/morphe/patches/teuida/TeuidaMicroG.kt` supplements shared native package/action routing and signer metadata with three narrowly checked changes:
 
-For the Play Services fallback, either verify the newer identitycredentials backend and its exact type/response contract, or deliberately preserve the older `getSignInIntent` route. Simply forcing every availability check to succeed selects the newer route. A candidate branch hook would distinguish provider discovery at `230815045` from the backend selection at `252400000`, or target that backend-selection call directly. This has not been implemented or validated.
+- It maps the exact Google credential type literal and its encoded `GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL` field constant to the MicroG capability. Google ID bundle keys and the SIWG subtype stay unchanged.
+- In the four-argument `GetSignInWithGoogleOption` constructor, it changes only the system-provider Boolean passed to `GetCustomCredentialOption`; auto-select remains true and `allowedProviders` remains empty. Direct DEX inspection identified separate `v7` / `v8` Boolean loads, and the patch checks their positions, values, constructor prototype, and argument range before editing.
+- In `CredentialProviderPlayServicesImpl.onGetCredential`, it replaces only the result consumed by the `252400000` backend-selection branch with false. The existing older `getSignInIntent` controller handles this fallback. Shared availability overrides therefore cannot select the newer identitycredentials backend for this request.
 
-Developer verification should cover API 33, API 34, and a later API using the exact installed MicroG artifact: provider discovery, user provider selection, cancellation, returned type, optional image data, and a real developer-approved Google/Firebase sign-in. Check the client ID, original signer metadata, binder features, and package/action destinations independently. No static result here establishes successful token issuance, Firebase acceptance, notification registration, or complete Google API compatibility.
+The API 34+ framework route remains active on supported devices and uses the vendor type with non-system eligibility. Its Android credential-provider setting must include MicroG's Google ID provider. The service class retains its `com.google.android.gms...GoogleIdService` name. The fallback deliberately uses the older controller, avoiding the newer chooser's optional profile-image schema mismatch.
+
+The compatibility target remains exact version `1.23.0` and experimental. Constructor, field-constant, and backend-gate checks reject a changed shape before mutation. Static application and compiled-output validation are recorded below; they do not establish successful account authentication.
+
+Developer verification should cover API 32/33, API 34, and a later API using the exact installed MicroG artifact: provider discovery, user provider selection, cancellation, returned type, optional image data, and a real developer-approved Google/Firebase sign-in. Check the client ID, original signer metadata, binder features, and package/action destinations independently. No static result here establishes successful token issuance, Firebase acceptance, notification registration, or complete Google API compatibility.
+
+## Validation
+
+All patch sources compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, and the existing offline checks passed. Combined local Premium + MicroG application to the inspected base succeeded and generated eight DEX files plus compiled resources. SDK DEX verification reported the same 1,938 optional-dependency hierarchy findings as the original APK, with no added findings.
+
+Compiled-output checks confirmed that four exact Google credential type literals and one encoded field constant were mapped; the Google option passed `system=false` and `auto-select=true` with an empty provider set; and the newer backend-selection result was false while its older controller remained present. Google ID bundle/protocol keys and protected billing/Firebase binder identifiers were unchanged. Compiled manifest and signer metadata checks passed. The packaged `.mpp` passed loader checks; the full Gradle task graph and device sign-in remain pending.
+
+Local validation tools and outputs are under `/private/tmp/teuida-research`: `validate-credential-patch.py`, `credential-patch-apply.log`, `credential-applied/`, and `VerifyCredentialOutputs.kt`. The output check verifies the encoded type constant, exact type literals, constructor flags, retained empty provider set, older backend selection, and unchanged Google ID bundle/protocol keys.
 
 ## REA evidence
 
