@@ -26,6 +26,10 @@ dependencies {
 sourceSets["test"].java.srcDirs("../tests", "../extensions/renshuu/src/main/java")
 
 tasks {
+    withType<JavaCompile>().configureEach {
+        options.release.set(17)
+    }
+
     test {
         useJUnit()
     }

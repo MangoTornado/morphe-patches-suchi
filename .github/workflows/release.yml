@@ -34,6 +34,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Verify tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :patches:test --no-daemon
+
+      - name: Verify signing configuration
+        env:
+          MORPHE_SIGNING_KEY: ${{ secrets.MORPHE_SIGNING_KEY }}
+        run: test -s morphe-signing.pub && test -n "$MORPHE_SIGNING_KEY"
+
       # Semantic release runs its own Gradle build command.
       # Only dev and main branch will generate a release as specified by .releaserc
       - name: Release
@@ -50,10 +60,10 @@ jobs:
           subject-name: 'Morphe Patches ${{ steps.release.outputs.new_release_git_tag }}'
           subject-path: patches/build/libs/patches-*.mpp
 
-      # Always verify tests and compilation when semantic-release did not publish a release.
+      # Verify compilation when semantic-release did not publish a release.
       # This covers non-main/dev branches, chore commits, docs commits, etc.
-      - name: Verify project builds and tests
+      - name: Verify project builds
         if: steps.release.outputs.new_release_published != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :patches:test :patches:buildAndroid clean --no-daemon
+        run: ./gradlew :patches:buildAndroid clean --no-daemon
