@@ -78,7 +78,7 @@ The field scope is limited to the generated holders. Their original DEX classes 
 
 Private pool-restoration initializers compile and pass independent DEX checks for all captured Strings and TEUIDA's descriptor-based Method lookups. The recovered helper body hashes also match. These candidates have not been applied to an APK or verified on ART and are not included in the public bundle. The twenty separate VM-routed SDK methods per app and any affected native state remain unresolved. The owned Frida server, forwarding rules, tokens, emulator and ADB server were cleaned up after the runtime checks.
 
-Device checks require the original splits, a compatible `app.revanced.android.gms` installation for the four MicroG targets, and developer-provided test accounts. Verify startup, local feature behavior, server-controlled content, login, cancellation, sign-out, FCM registration/delivery, and billing purchase/restore behavior. Static local overrides do not establish server entitlement or content access.
+Device checks use the original splits and a compatible `app.revanced.android.gms` installation for the four MicroG targets. Startup and unauthenticated UI checks can run without accounts; authenticated or entitled behavior needs appropriate test accounts. Verify local feature behavior, server-controlled content, login, cancellation, sign-out, FCM registration/delivery, and billing purchase/restore behavior. Static local overrides do not establish server entitlement or content access.
 
 Patch compatibility checks package and version name. Pimsleur's Premium patch additionally requires the exact inspected Hermes asset hash; the other patches do not require a matching APK hash or version code. Report hashes identify the tested inputs.
 
