@@ -1,8 +1,8 @@
 {
-  "created_at": "2026-11-02T05:58:31",
-  "description": "## 1.0.0 (2026-11-02)\n\n### ✨ New Features\n\n* Enable signed experimental patch releases ([55adfa3](https://github.com/[secure]/morphe-patches-suchi/commit/55adfa3ed769d093d3f578592ca18a6939347f95))\n\n### 🐛 Bug Fixes\n\n* Align Java and Kotlin release targets ([d77fda6](https://github.com/[secure]/morphe-patches-suchi/commit/d77fda6c8868c0ae8600bfa6816bb835fe198c21))\n* Exclude unsigned test artifacts from releases ([28104e3](https://github.com/[secure]/morphe-patches-suchi/commit/28104e381c1bad382fb2bd78a4a3a2ca81f8c1db))",
-  "download_url": "https://github.com/MangoTornado/morphe-patches-suchi/releases/download/v1.0.0/patches-1.0.0.mpp",
+  "created_at": "2026-11-02T06:33:47",
+  "description": "## [1.1.0-dev.1](https://github.com/[secure]/morphe-patches-suchi/compare/v1.0.0...v1.1.0-dev.1) (2026-11-02)\n\n### ✨ New Features\n\n* Show Du Chinese reading download errors ([02312c3](https://github.com/[secure]/morphe-patches-suchi/commit/02312c35a4acf813310fac59ef554d5f50da810a))",
+  "download_url": "https://github.com/MangoTornado/morphe-patches-suchi/releases/download/v1.1.0-dev.1/patches-1.1.0-dev.1.mpp",
   "signature_download_url": "",
-  "version": "1.0.0",
+  "version": "1.1.0-dev.1",
   "public_key": "xzo4QfI5bZVQtP8bSuncP2aHU9FF3KyZI4L0CcCl++4="
 }
