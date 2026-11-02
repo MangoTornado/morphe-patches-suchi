@@ -46,10 +46,21 @@ The optional **Show reading download errors** patch adds these details to that d
 - Response byte count and MIME type, when available.
 - Up to four cause classes and three method locations per throwable, when available.
 - Whether the original malformed-URL wrapper contains an empty or nonempty request URL.
+- Original lesson input, accepted reader URL and latest binding-attempt URL presence.
+
+The additional labels mean:
+
+| Label | Observation |
+| --- | --- |
+| `Observed lesson URL` | Latest original `crdUrl` input observed on the model when the accepted reader binding was attempted |
+| `Reader URL` | Actual URL value stored by that accepted reader binding |
+| `Latest observed lesson URL` | Latest model input observed when a binding attempt reached the reader, including an attempt its one-time guard skipped |
+
+These labels show only `null`, `empty`, `nonempty` or `unavailable`. The original input is recorded before null-to-empty normalization. The accepted observations remain unchanged when a later attempt skips the original URL store. A model update suppressed by the outer binding guard does not update `Latest observed lesson URL`. The model observation is a snapshot at binding time and is not atomically associated with the collected reader state. It does not identify a response, cache or stored document as its source.
 
 Method locations contain only validated class and method names and positive line numbers. Missing line numbers do not prevent displaying the method. Cause cycles and longer chains are marked as omitted.
 
-It excludes URL values, response contents, token values, exception messages, filenames and suppressed exceptions. URL presence is classified only for the original `RuntimeException` wrapper with an immediate `MalformedURLException` cause and its known message prefix; only `empty` or `nonempty` is displayed. The details are consumed once on the callback thread; other dialog messages retain their original text. It changes neither requests nor entitlement.
+It excludes URL values, response contents, token values, exception messages, filenames and suppressed exceptions. Request URL presence is classified only for the original `RuntimeException` wrapper with an immediate `MalformedURLException` cause and its known message prefix. Lesson observations retain only fixed presence labels in synchronized maps with weak model and reader references. The details are consumed once on the callback thread; other dialog messages retain their original text. It changes neither requests nor entitlement.
 
 To reproduce, refresh the Suchi source in Morphe, patch the original Du Chinese 3.6.1 APK with **Show reading download errors** enabled, and reopen the failing premium reading. Share the dialog details with the developer.
 
@@ -81,7 +92,7 @@ That list request retains the original stored subscription token as `t`, omittin
 
 The original reading GET inherits `xb.g.A`, which adds only a User-Agent header. Volley also supplies conditional cache headers, `If-None-Match` and `If-Modified-Since`. These selected producers attach no account UUID/token or Authorization header; the supplied lesson URL is passed unchanged through the request constructors. This does not establish content-server policy, signed-URL requirements or cookie behavior. Twelve original methods, 257 instructions and twelve supporting REA records are retained under `/private/tmp/du-chinese-download-diagnostics/crd-request-metadata/`. Evidence: `ev_f0d3057e49fa33c5db7b2801c22fd596b138171fa0edbfdb77ed86e519cef3c8`, `ev_a914c65f8000bda7f6c56d360131e78333784d3bea94fd2ed3031adcc8a74b96`, `ev_f0bfe6556c38a2e5449396140444e13470d39334185629bbd8057ac456eeae82`.
 
-For the next device comparison, refresh the parent collection/list and wait for it to finish, then open the same reading in a new reading screen. Compare that with opening its stored document from Favorites, recording the entry path and existing diagnostic details for each. Different results can distinguish these paths; equal empty-URL errors still leave the metadata source unresolved.
+For the next device comparison, refresh the Suchi source and re-patch the original APK with the updated diagnostic enabled. Refresh the parent collection/list and wait for it to finish, then open the same reading in a new reading screen. Compare that with opening its stored document from Favorites, recording the entry path and all four URL-presence labels for each. `Observed lesson URL: null` with `Reader URL: empty` is consistent with the original normalization path, but does not prove both observations came from the same state publication. A later `Latest observed lesson URL: nonempty` with the reader still empty shows a newer observation at a binding attempt that did not replace that stored value. Equal empty-URL errors still leave the metadata source unresolved.
 
 Invalid reading JSON uses the separate invalid-lesson dialog. The earlier `xb.a.c` downloader finding concerns audio and does not establish the reading-text failure.
 
@@ -115,6 +126,8 @@ The patched base APK and supplied splits installed on an isolated Android 37 emu
 
 ## Validation
 
-All three Du Chinese patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied together to the original base APK, and produced verified DEX and resources with no hierarchy findings. The current Gradle build, sixteen JUnit tests and bundle loader checks passed.
+All three Du Chinese patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied together to the original base APK, and produced verified DEX and resources with no hierarchy findings. The current Gradle build, twenty-three JUnit tests and bundle loader checks passed. All lines and branches of the six new lesson-state helper methods are covered.
 
 The v1.1.0 diagnostics APK installed with the original supplied splits and reached `MainActivity` on an offline Android 35 emulator without a package crash. An Android test using the updated APK's real Volley classes verified synthetic HTTP 403 metadata, a DNS cause class, the original malformed-URL wrapper's nested cause and location, and the actual callback's null-fragment cleanup. These fixtures contacted no backend and do not identify the reported device failure. See [validation results](validation.md).
+
+The current lesson-state fixture exercised the actual patched lesson publication and binding methods with synthetic state. Input classifications, accepted and skipped stores, both lifetime guards, direct helper rendering and complete callback cleanup passed. It does not establish live dialog rendering or production state ordering; the detailed fixture boundaries are recorded in [validation results](validation.md).

@@ -4,11 +4,15 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
 public final class DownloadDiagnostics {
     private static final Object UNAVAILABLE = new Object();
     private static final ThreadLocal<String> FAILURE = new ThreadLocal<>();
+    private static final Map<Object, String> LESSONS = new WeakHashMap<>();
+    private static final Map<Object, String> CANDIDATES = new WeakHashMap<>();
+    private static final Map<Object, String[]> ACCEPTED = new WeakHashMap<>();
     private static final Pattern MIME_TYPE =
             Pattern.compile("[a-zA-Z0-9!#$&^_.+-]+/[a-zA-Z0-9!#$&^_.+-]+");
     private static final Pattern CLASS_NAME =
@@ -17,6 +21,38 @@ public final class DownloadDiagnostics {
             Pattern.compile("[a-zA-Z_$][a-zA-Z0-9_$]*|<init>|<clinit>");
 
     private DownloadDiagnostics() {}
+
+    public static synchronized void recordLesson(Object model, String url) {
+        if (model != null) LESSONS.put(model, presence(url));
+    }
+
+    public static synchronized void recordCandidate(Object model, Object fragment) {
+        if (fragment != null) CANDIDATES.put(fragment, LESSONS.get(model));
+    }
+
+    public static synchronized void acceptCandidate(Object fragment, String url) {
+        if (fragment != null) {
+            ACCEPTED.put(fragment, new String[] {CANDIDATES.get(fragment), presence(url)});
+        }
+    }
+
+    public static synchronized void appendLessonState(Object fragment) {
+        String details = FAILURE.get();
+        if (details == null) return;
+        String[] accepted = ACCEPTED.get(fragment);
+        FAILURE.set(details
+                + "\nObserved lesson URL: " + available(accepted == null ? null : accepted[0])
+                + "\nReader URL: " + available(accepted == null ? null : accepted[1])
+                + "\nLatest observed lesson URL: " + available(CANDIDATES.get(fragment)));
+    }
+
+    private static String presence(String url) {
+        return url == null ? "null" : url.isEmpty() ? "empty" : "nonempty";
+    }
+
+    private static String available(String state) {
+        return state == null ? "unavailable" : state;
+    }
 
     public static void capture(Object error) {
         clear();
