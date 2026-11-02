@@ -28,6 +28,8 @@ These patches are experimental and disabled by default. Select them explicitly f
 
 Local overrides do not alter server account entitlements. MicroG routing targets `app.revanced.android.gms`; device login and notification delivery remain unverified. The reports describe each patch's scope and the remaining developer checks.
 
+Du Chinese's optional **Show reading download errors** patch displays the Volley error class and available HTTP status in its reading download dialog. See the [diagnostic instructions](docs/du-chinese-research.md#reading-download-diagnostics).
+
 TEUIDA and Pimsleur crash after re-signing in offline startup tests; protection support is pending. Kanji Study has no patch yet.
 
 See [validation results](docs/validation.md) for builds, APK application checks and offline startup results.
@@ -35,7 +37,7 @@ See [validation results](docs/validation.md) for builds, APK application checks 
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.0.0](https://github.com/MangoTornado/morphe-patches-suchi/releases/tag/v1.0.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;8 patches total
+> **[v1.1.0-dev.1](https://github.com/MangoTornado/morphe-patches-suchi/releases/tag/v1.1.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;9 patches total
 <details open>
 <summary>📦 renshuu&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -55,7 +57,7 @@ See [validation results](docs/validation.md) for builds, APK application checks 
 </details>
 
 <details open>
-<summary>📦 Du Chinese&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
+<summary>📦 Du Chinese&nbsp;&nbsp;•&nbsp;&nbsp;3 patches</summary>
 <br>
 
 **Package name:** `org.sinamon.duchinese`
@@ -69,6 +71,7 @@ See [validation results](docs/validation.md) for builds, APK application checks 
 |----------|----------------|-----------|
 | [Enable local Premium controls](#enable-local-premium-controls) | Overrides Du Chinese's local subscription and next-lesson checks for research. Server entitlement and content availability remain unverified. |  |
 | [MicroG integration](#microg-integration) | Experimental native Google-service routing through app.revanced.android.gms. Requires MicroG; sign-in and notification delivery need device verification. |  |
+| [Show reading download errors](#show-reading-download-errors) | Adds the Volley error class, HTTP status and safe response metadata to Du Chinese's reading download dialog. Does not change requests or account entitlement. |  |
 
 </details>
 
