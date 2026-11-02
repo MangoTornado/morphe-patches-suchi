@@ -347,6 +347,29 @@ activity snapshot showed the launcher. That different process and state do not
 establish why the earlier target-side bootstrap failed. Both bounded processes
 were stopped; no app initializer or decoder was invoked by the delayed probe.
 
+## Original offline UI
+
+An ordinary offline run of the original-signed Kanji Study 7.8.3 APK reached
+Unlock Kanji, Guided Study, KLC Graded Reading Sets (Reading Levels 2–10 and
+11–23), and Outlier Essentials/Expert. Selecting Elementary 2 after
+novice/school-grade onboarding opened the base upgrade screen. Billing was
+unavailable in the guest; no purchase, restore, account or external-link action
+was selected.
+
+The pages describe beginner Guided Study, exercises for the first 100 KLC
+kanji, and over 100 Essentials / over 50 Expert entries as free. They present
+the add-ons as separate purchases that can be used without the base upgrade.
+These are observed page claims, with one directly exercised upgrade gate.
+Other feature limits and entitlement behavior remain unverified. Visible
+labels were not matched to encrypted product/preference names in this pass.
+
+All three installed split hashes matched the preserved originals. Guest
+IPv4/IPv6 routes were empty, and all owned listeners bound to loopback. The
+app, emulator and private ADB processes were stopped and their listeners
+verified absent. No instrumentation or APK change occurred. The 24 paired
+XML/screenshot observations and hash-pinned ledger are retained privately under
+`/private/tmp/kanji-study-research/offline-ui-followup/attempt-02/`.
+
 Use free and entitled developer test accounts to compare upgrade, Guided Study,
 KLC and Outlier consumers and server responses. For MicroG, verify the actual
 account/token flow, availability checker, FCM registration and delivery on a
