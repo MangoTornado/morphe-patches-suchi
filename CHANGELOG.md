@@ -1,3 +1,9 @@
+## [1.1.1-dev.1](https://github.com/[secure]/morphe-patches-suchi/compare/v1.1.0...v1.1.1-dev.1) (2026-11-02)
+
+### 🐛 Bug Fixes
+
+* Identify wrapped Du Chinese download failures ([73459aa](https://github.com/[secure]/morphe-patches-suchi/commit/73459aad8262eae95a5babaa673ea00c91ae2f9d))
+
 ## [1.1.0](https://github.com/[secure]/morphe-patches-suchi/compare/v1.0.0...v1.1.0) (2026-11-02)
 
 ### ✨ New Features
