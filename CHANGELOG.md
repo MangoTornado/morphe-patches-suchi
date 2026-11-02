@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/[secure]/morphe-patches-suchi/compare/v1.0.0...v1.1.0) (2026-11-02)
+
+### ✨ New Features
+
+* Show Du Chinese reading download errors ([02312c3](https://github.com/[secure]/morphe-patches-suchi/commit/02312c35a4acf813310fac59ef554d5f50da810a))
+
 ## [1.1.0-dev.1](https://github.com/[secure]/morphe-patches-suchi/compare/v1.0.0...v1.1.0-dev.1) (2026-11-02)
 
 ### ✨ New Features
