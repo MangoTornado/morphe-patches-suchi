@@ -1,14 +1,13 @@
-group = "app.template"
+group = "suchi.morphe"
 
 patches {
-    // TODO: Update this section with your project details.
     about {
-        name = "UserXYZ Patches"
-        description = "Patches for apps I like"
-        source = "git@github.com:UserXYZ/morphe-patches.git"
-        author = "Awesome dev"
-        contact = "na"
-        website = "na"
+        name = "Suchi Patches"
+        description = "A personal collection of experimental app patches"
+        source = "git@github.com:MangoTornado/morphe-patches-suchi.git"
+        author = "MangoTornado"
+        contact = "mangoinsight@gmail.com"
+        website = "https://github.com/MangoTornado/morphe-patches-suchi"
         license = "GPLv3"
     }
 }
@@ -20,9 +19,25 @@ val patchListGeneratorClasspath = configurations.create("patchListGeneratorClass
 dependencies {
     compileOnly(libs.gson)
     patchListGeneratorClasspath(libs.gson)
+    testImplementation(libs.morphe.patcher)
+    testImplementation("junit:junit:4.13.2")
 }
 
+sourceSets["test"].java.srcDirs("../tests", "../extensions/renshuu/src/main/java")
+
 tasks {
+    withType<JavaCompile>().configureEach {
+        options.release.set(17)
+    }
+
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEach {
+        compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+
+    test {
+        useJUnit()
+    }
+
     register<JavaExec>("generatePatchesList") {
         description = "Build patch with patch list"
 

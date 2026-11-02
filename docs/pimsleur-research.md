@@ -1,0 +1,68 @@
+# Pimsleur static research
+
+Inspected on 2026-11-02 with REA/JADX (reported provider version `0.7.1`) and a bounded offline Hermes v96 reader. The original workspace archive was preserved. Findings describe the extracted base APK and its shipped bytecode; publisher identity, device behavior and backend enforcement were not verified. APK signature verification passed during output checks.
+
+| Artifact | Value |
+| --- | --- |
+| Package | `com.simonandschuster.pimsleur.unified.android` |
+| Version | `8.1`, version code `759` |
+| Android SDK | Minimum `24`, target `36` |
+| Archive SHA-256 | `290e073e95492c70008bc7d8fd0ea874a7a6cccd20547d165cdcd6db5ec5a065` |
+| Base APK SHA-256 | `15629eef999249cd02e79e8af056df9272551ce82126993480130811a68ffef9` |
+
+## Recovered local Premium controls
+
+The app uses React Native and an 8,269,940-byte Hermes v96 `assets/index.android.bundle`, SHA-256 `00de65410c84a4907be54bfe11d211b8a7f5e868264f7e924af9398131fec0c5`. Its SHA-1 footer verifies. Offline decoding recovered all 64,230 strings and 49,524 function headers covering 37,660 distinct bodies. All bodies decoded with the version-specific opcode definitions, without unknown opcodes, truncated operands or out-of-range string/function references. Original JavaScript source was not reconstructed.
+
+| Function | ID | Byte offset / size | Recovered decision |
+| --- | ---: | --- | --- |
+| `isPU` | `7158` | `3521571 / 41` | Reads `entities.productInfo[0].isPU`, defaulting to false. |
+| `getPremiumStatus` | `7169` | `3522424 / 84` | Reads `languagePicker.selectedProduct.isPU`; when `isAllAccess`, reads `languagePicker.allAccessSelectLanguageLevel.isPremium`. Both default to false. |
+| `isSupportPremiumFeature` | `27725` | `5515916 / 534` | Consumes `isPU`, `isFreeLesson`, reading and bonus-pack state, then branches to a not-available modal. |
+
+Module function `7106` creates and exports the first two selectors. There are 107 typed instruction references to `isPU`, including reads in Premium feature, AI feature and UI code; this count includes property definitions and does not establish 107 runtime calls. `getPremiumStatus` has two export-property references, so its runtime consumers remain less certain.
+
+The experimental, disabled-by-default **Enable local Premium controls** patch targets version `8.1` and requires the exact original Hermes bundle hash. It replaces only the two selector bodies with `LoadConstTrue r0; Ret r0`, fills the remaining body bytes with `Unreachable`, and repairs the footer. The bodies are not shared with other function headers. The patch does not mutate stored entitlement, receipt data, authentication or backend request builders. Other checks, including bonus packs, free lessons and AI availability, remain relevant.
+
+Both an independently derived bundle and the actual patcher output pass structural verification: 128 differing bytes fall entirely within the two bodies and the footer, all 37,658 other distinct function bodies and all headers/tables remain unchanged, and both replacement bodies decode to return true with valid unreachable padding. Its SHA-256 is `30a659353cf17666a027c038ea47262427ede69c2d15992ceebcc561379a7cb4`. This verifies the bytecode change, not device execution or content access.
+
+## Purchase and server boundary
+
+Decoded function `18183` creates a `@@purchase/verifyReceiptViaBackend` action using request-builder function `18189`. That builder constructs `POST /account/{customerId}/receipt` with `productId`, `transactionId`, `originalMessage`, `transactionResult`, `receipt`, `storeDomain`, `isMultiple` and `appVersion`. `verifyTransaction` (`18191`) selects this action on Android; a separate builder handles restore requests.
+
+These are recovered request definitions and platform branches. No request was sent, no receipt was forged, and backend acceptance rules or download controls were not observed. Google Play Billing, Nitro IAP and OpenIAP are packaged; native `NativeLoginModule.exchangeTokens` also uses Auth0. A developer-controlled free/entitled account comparison is still needed to establish behavior after the local selectors change.
+
+## Decoder provenance
+
+REA `6.7.0` has no advertised Hermes decoder. A cached `hermesc` reports HBC v98 and rejects the original v96 file; changing only a private inspection copy's version header also fails deserialization. Neither output was used as control-flow evidence.
+
+The successful reader uses verified upstream schema and v96 opcode references from `P1sec/hermes-dec`, pinned commit `2e796663e1fedb93dca51060797ebf3327b3fedb`. Reference documents were retrieved read-only and checked against upstream Git blob hashes. Retrieved Python modules were parsed as AST data, never imported or executed. The private utility and AGPL-3.0 reference notices remain outside the public patch repository. No source map, target-code execution or live service was required to recover the bytecode.
+
+## MicroG applicability
+
+Both named availability methods are present with the exact DEX prototype `(Landroid/content/Context;I)I`: `GooglePlayServicesUtilLight.isGooglePlayServicesAvailable` and `GoogleApiAvailabilityLight.isGooglePlayServicesAvailable`. The wrapper delegates to the utility and maps an updating condition to status `18`. JADX reports duplicated blocks in the utility body, so its reconstructed branch details should not be used as exact control-flow evidence.
+
+`FirebaseMessaging.getToken` has a native caller in Salesforce Marketing Cloud's `MCService.d(Context,String)`. This makes native messaging a candidate for service-package redirection, subject to device testing. A bounded trace of `GoogleSignInClient.getSignInIntent` found only an SDK-internal caller; it did not establish an application Google sign-in route. JavaScript, dynamic and reflective paths remain unknown. Google Play Billing's `com.android.vending` route must stay intact when testing messaging changes.
+
+The shared **MicroG integration** patch targets only inspected version `8.1`, marked experimental and disabled by default. It redirects selected native external Google package, account, service and provider identifiers to `app.revanced.android.gms`, adds its package query and original signer metadata, and makes both availability methods return success. It leaves the Hermes bundle, class/Binder descriptors, internal Firebase actions and Play Billing routing unchanged. A matching MicroG installation is required. This native routing does not establish JavaScript compatibility, successful login or notification delivery.
+
+## Validation
+
+The combined local Premium + MicroG patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX, compiled resources and the modified Hermes asset. SDK DEX verification found the same 58 optional-dependency hierarchy findings in the original and patched APK; no findings were added. Protocol-routing and compiled manifest checks passed. The raw asset is exported as `other-resources/assets/index.android.bundle` for APK assembly, separately from `resources.apk`.
+
+A second patcher run rejected a changed Hermes asset with the same app version before mutation. The signed `.mpp` passed loader and signature checks, and the full Gradle build and tests passed. Split-APK startup checks reached a native Pairip protection boundary; see [validation results](validation.md) for the original and re-signed controls. Paid feature behavior remains unverified.
+
+## Evidence
+
+Canonical REA records are exported locally at `/private/tmp/pimsleur-research/evidence.json`. Hermes findings are supplemental analyst decoding, separate from those records: `hermes-v96-tables.json`, `hermes-v96-decode-summary.json`, `hermes-v96-string-references.json`, `hermes-v96-selected-functions.txt`, `hermes-v96-backend-and-gate-functions.json` and `hermes-v96-premium-verification.json` in the same directory. Primary reference provenance is in the workspace `.research-tools/hermes-v96-source-references.json`.
+
+| Observation | REA evidence ID |
+| --- | --- |
+| Package identity | `ev_d2e7575130977ebb1ed86901d386a2e5629e91c7ffb404f2e26780e39aa27fb6` |
+| Native app inventory | `ev_a15c101561d7a5a74ddc56d00bc4fb261fca326455f85fa4243c3bbe3a74ea78` |
+| Auth0 token exchange | `ev_c3915b84e145bbc78586ff574893ddad07ae7b7656eebb238fcd5eff62ce316c` |
+| Native IAP inventory | `ev_94b8f75ca3f41cd5f74497b95896e3953848df4bc7c76a91c20a36cf913c5c14` |
+| FCM caller | `ev_f866284b4f634f08898ad7b6e53022b34d934ecfe73c5018556205176f67f2b3` |
+| Google sign-in caller trace | `ev_d5c55f48672fd5fc282402d6760fb70392d18b8e176e7b5b920f113582cb5b0f` |
+| Utility availability method | `ev_232d1b07d81319e925ad89eca945006afd06ef1c7a9e7a26dec5bf07a4cb6913` |
+| API availability wrapper | `ev_ffe4c81f116b55e1464fc956e0536ebfe0ef6c6f8d8f5df6a4687e96c7f248e8` |
