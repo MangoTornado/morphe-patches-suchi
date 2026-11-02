@@ -3,10 +3,10 @@ group = "suchi.morphe"
 patches {
     about {
         name = "Suchi Patches"
-        description = "Patches for use with Morphe"
+        description = "A personal collection of experimental app patches"
         source = "git@github.com:MangoTornado/morphe-patches-suchi.git"
         author = "MangoTornado"
-        contact = "na"
+        contact = "mangoinsight@gmail.com"
         website = "https://github.com/MangoTornado/morphe-patches-suchi"
         license = "GPLv3"
     }
@@ -19,9 +19,17 @@ val patchListGeneratorClasspath = configurations.create("patchListGeneratorClass
 dependencies {
     compileOnly(libs.gson)
     patchListGeneratorClasspath(libs.gson)
+    testImplementation(libs.morphe.patcher)
+    testImplementation("junit:junit:4.13.2")
 }
 
+sourceSets["test"].java.srcDirs("../tests", "../extensions/renshuu/src/main/java")
+
 tasks {
+    test {
+        useJUnit()
+    }
+
     register<JavaExec>("generatePatchesList") {
         description = "Build patch with patch list"
 

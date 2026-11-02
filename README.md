@@ -14,6 +14,22 @@ Click the button below, or manually add this repo url to Morphe Manager: https:/
   <img src=".github/assets/add-to-morphe.svg" alt="Add to Morphe" height="48">
 </a>
 
+### Research patches
+
+These patches are experimental and disabled by default. Select them explicitly for the listed app version.
+
+| App | Version | Local controls | MicroG |
+| --- | --- | --- | --- |
+| [renshuu](docs/renshuu-research.md) | 1.2.20260311 | Pro, Reading Buddy and Text Analyzer menus | Native routing |
+| [Du Chinese](docs/du-chinese-research.md) | 3.6.1 | Subscription controls and next-lesson gate | Native routing |
+| [TEUIDA](docs/teuida-research.md) | 1.23.0 | Premium getters | [Credential Manager investigation](docs/teuida-microg-research.md) |
+| [Pimsleur](docs/pimsleur-research.md) | 8.1 | Hermes investigation | Native routing |
+| [Kanji Study](docs/kanji-study-research.md) | 7.8.3 | Protected-code investigation | Protected-code investigation |
+
+Local overrides do not alter server account entitlements. MicroG routing targets `app.revanced.android.gms`; device login and notification delivery remain unverified. The reports describe each patch's scope and the remaining developer checks.
+
+See [validation results](docs/validation.md) for compilation, APK application checks and pending device tests.
+
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
@@ -90,6 +106,7 @@ To develop and release your Patches using this template:
 ### 🛠️ Building locally
 
 - Run `./gradlew buildAndroid`
+- Run `./gradlew :patches:test` for Pro-state and MicroG routing checks.
 - The built patches .mpp file is found in `patches/build/libs/patches-*.mpp`
 - Patch the mpp file using [Morphe-Desktop](https://github.com/MorpheApp/morphe-desktop)
   like any other patch bundle.
