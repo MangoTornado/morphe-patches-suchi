@@ -1,7 +1,8 @@
 {
-  "created_at": "",
-  "description": "",
-  "download_url": "",
+  "created_at": "2026-11-02T05:49:46",
+  "description": "## 1.0.0-dev.1 (2026-11-02)\n\n### ✨ New Features\n\n* Enable signed experimental patch releases ([55adfa3](https://github.com/[secure]/morphe-patches-suchi/commit/55adfa3ed769d093d3f578592ca18a6939347f95))\n\n### 🐛 Bug Fixes\n\n* Align Java and Kotlin release targets ([d77fda6](https://github.com/[secure]/morphe-patches-suchi/commit/d77fda6c8868c0ae8600bfa6816bb835fe198c21))",
+  "download_url": "https://github.com/MangoTornado/morphe-patches-suchi/releases/download/v1.0.0-dev.1/patches-1.0.0-dev.1.mpp",
   "signature_download_url": "",
-  "version": ""
+  "version": "1.0.0-dev.1",
+  "public_key": "xzo4QfI5bZVQtP8bSuncP2aHU9FF3KyZI4L0CcCl++4="
 }
