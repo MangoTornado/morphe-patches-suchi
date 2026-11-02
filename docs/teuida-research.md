@@ -30,6 +30,10 @@ Trial and gift flows also use separate inputs. `FinishSubscriptionViewModel.h` r
 
 `PremiumRepositoryImpl.h` sends a `SendPurchaseSubscriptionRequest` through `TeuidaAPI.V` with authentication headers. A separate backend purchase path therefore exists. Static inspection does not establish its validation rules, whether downloaded content has further checks, or the behavior of inconsistent trial, gift and expiry fields. Device testing with developer-provided free and entitled accounts is required.
 
+Further inspection found no external direct field consumers of `MeData.serviceDateTime`, `serviceEndDDay` or `giftPremiumActive` across all eight DEX entries: 339,367 implemented methods and 5,593,360 instructions were scanned. This result does not cover reflection or serialization. The gift-expiry screen reads separate preferences and updates its displayed clock every second; actual expiry enforcement remains unverified.
+
+The original subscription-completion consumer updates `freeTrial` and `premiumState`, publishes the Premium event and activates cached Premium state only after `NetworkResult.Success`. Restore also retains the purchase-token and successful-network-result gates. Login, pending and failure branches remain independent of the three getter overrides. Complete asset downloads and backend acceptance remain untested. Evidence: `ev_d4ea0e8e2f4b4a574a39482c9fae6e3f52c92d8e814217c9df6daff2cd0da26e`; exact descriptors, offsets, scan scope and supporting records are retained under `/private/tmp/teuida-research/app-level-trial-expiry/`.
+
 ## MicroG applicability
 
 Both named availability methods exist with the exact DEX prototype `(Landroid/content/Context;I)I`: `GooglePlayServicesUtilLight.isGooglePlayServicesAvailable` and `GoogleApiAvailabilityLight.isGooglePlayServicesAvailable`. The wrapper delegates to the utility and maps an updating condition to `18`. The utility's JADX output contains duplicated-block warnings; precise branch conclusions require DEX inspection.

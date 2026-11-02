@@ -33,7 +33,7 @@ private val downloadDialogFingerprint = Fingerprint(
 @Suppress("unused")
 val downloadDiagnosticsPatch = bytecodePatch(
     name = "Show reading download errors",
-    description = "Adds the Volley error class, HTTP status, cause locations and safe response metadata to " +
+    description = "Adds the Volley error class, HTTP status, cause locations, URL presence and safe response metadata to " +
         "Du Chinese's reading download dialog. Does not change requests or account entitlement.",
     default = false,
 ) {

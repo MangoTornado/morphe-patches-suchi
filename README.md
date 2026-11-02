@@ -28,7 +28,7 @@ These patches are experimental and disabled by default. Select them explicitly f
 
 Local overrides do not alter server account entitlements. MicroG routing targets `app.revanced.android.gms`; renshuu sign-in is user-verified, while other login paths and notification delivery remain pending. The reports describe each patch's scope and the remaining developer checks.
 
-Du Chinese's optional **Show reading download errors** patch displays the Volley error class and available HTTP status in its reading download dialog. See the [diagnostic instructions](docs/du-chinese-research.md#reading-download-diagnostics).
+Du Chinese's optional **Show reading download errors** patch displays the Volley error class, available HTTP status, cause locations and URL presence in its reading download dialog. See the [diagnostic instructions](docs/du-chinese-research.md#reading-download-diagnostics).
 
 TEUIDA and Pimsleur crash after re-signing in offline startup tests; protection support is pending. Kanji Study has no patch yet.
 

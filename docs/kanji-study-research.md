@@ -273,7 +273,7 @@ Evidence:
 
 `GoogleDriveActivity.onCreate` reads its selected account from the string
 preference `r13.D7` when there is no saved state. A nonempty account enters
-the credential setup path; the account-result callback has not been expanded.
+the credential setup path.
 `GoogleDriveActivity.l()` resolves member 9623 to
 `GoogleAccountCredential.usingOAuth2(Context, Collection)` and member 18594 to
 `setSelectedAccountName(String)`. It builds a Google Drive client with the
@@ -281,7 +281,8 @@ credential, `NetHttpTransport` and `GsonFactory`. Its installed request handler
 obtains a token through `bb1.b(context, accountName, scope)` and adds a decoded
 prefix plus that token to the HTTP Authorization header. On its first HTTP 401,
 the response handler passes the stored token to `bb1.a` and returns true;
-that helper's downstream operation remains uninspected. This establishes a
+that helper constructs modern GMS and legacy service requests using the current
+token. This establishes a
 connected application account/token path. The plaintext scope, account type
 and header prefix remain unresolved, and Google/MicroG behavior has not been
 validated at runtime. The observed
@@ -292,8 +293,19 @@ Evidence:
 `ev_88a58b168a665afcc2b29a6a5d9d97d8316119bdc5bd0965187312ac2212bc13`,
 `ev_18c292fb9a384934e5a1b8f4ee572e65d1dd5c6eaf5a28b1466441405037cd08`,
 `ev_65f1966241a9f2d9d9f5ddbdd0fbe62e726d00eed06cd9ebed77dfaa717eafef`.
-The earlier app-owned FCM preference entry point remains visible; registration
-and delivery require a runtime test.
+Further inspection distinguishes the account chooser from the recoverable-auth
+contract. A successful nonempty account result is saved through `r13.t`, and
+the Drive client is rebuilt. The inspected failure callback retains the
+one-time recoverable-auth launch and generic failure presentation. Successful
+token invalidation and Google/MicroG compatibility remain unverified.
+
+The manifest also declares the app's non-exported Firebase messaging service.
+Its message handler filters promotional notifications using the original
+product preferences and opens the matching purchase screen. Another callback
+selects between two configuration requests using a preference. Payload,
+preference and protocol names remain encrypted; registration and delivery were
+not tested. Exact descriptors and 26 verified evidence records are retained
+privately under `/private/tmp/kanji-study-research/app-account-followup/`.
 
 No premium or MicroG patch is included for this artifact. Required purchase
 methods reside in encrypted asset records, outside the original base DEX that

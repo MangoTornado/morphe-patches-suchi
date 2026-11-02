@@ -98,6 +98,43 @@ class DownloadDiagnosticsTest {
         assertFalse(message.contains("java.lang.IllegalStateException"))
     }
 
+    @Test
+    fun distinguishesEmptyRequestUrlsWithoutExposingTheirValues() {
+        for (url in listOf("", "https://private.invalid/?token=private", "/private.crd", " \r\n")) {
+            val malformed = MalformedURLException("private parser details")
+            val runtime = RuntimeException("Bad URL $url", malformed)
+            DownloadDiagnostics.capture(Error(null, runtime))
+            val message = DownloadDiagnostics.appendToMessage("", downloadMessageId).toString()
+            val expected = if (url.isEmpty()) "empty" else "nonempty"
+            assertTrue(message.lines().contains("Request URL: $expected"))
+            assertTrue(message.contains("Cause 2: java.net.MalformedURLException"))
+            assertFalse(message.contains("private"))
+            assertFalse(message.contains("Bad URL"))
+            assertFalse(message.contains("https://"))
+            assertFalse(message.contains("token="))
+        }
+    }
+
+    @Test
+    fun omitsUrlStateForUnrelatedOrUnrecognizedWrappers() {
+        val malformed = MalformedURLException("private parser details")
+        val wrappers = listOf(
+            RuntimeException(null as String?, malformed),
+            RuntimeException("Bad URL", malformed),
+            RuntimeException("private wrapper", malformed),
+            RuntimeException("Bad URL private", UnknownHostException("private hostname")),
+            RuntimeException("Bad URL private", Exception("private intermediate", malformed)),
+            object : RuntimeException("Bad URL ", malformed) {},
+        )
+        for (wrapper in wrappers) {
+            DownloadDiagnostics.capture(Error(null, wrapper))
+            val message = DownloadDiagnostics.appendToMessage("", downloadMessageId).toString()
+            assertFalse(message.contains("Request URL:"))
+            assertFalse(message.contains("private"))
+            assertFalse(message.contains("Bad URL"))
+        }
+    }
+
     @Test(timeout = 1000)
     fun stopsCauseCyclesIncludingCyclesBackToTheVolleyError() {
         val first = RuntimeException("private first")
