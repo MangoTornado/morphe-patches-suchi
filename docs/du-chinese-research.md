@@ -45,10 +45,11 @@ The optional **Show reading download errors** patch adds these details to that d
 - HTTP status when the error retains a network response.
 - Response byte count and MIME type, when available.
 - Up to four cause classes and three method locations per throwable, when available.
+- Whether the original malformed-URL wrapper contains an empty or nonempty request URL.
 
 Method locations contain only validated class and method names and positive line numbers. Missing line numbers do not prevent displaying the method. Cause cycles and longer chains are marked as omitted.
 
-It excludes URLs, response contents, token values, exception messages, filenames and suppressed exceptions. The details are consumed once on the callback thread; other dialog messages retain their original text. It changes neither requests nor entitlement.
+It excludes URL values, response contents, token values, exception messages, filenames and suppressed exceptions. URL presence is classified only for the original `RuntimeException` wrapper with an immediate `MalformedURLException` cause and its known message prefix; only `empty` or `nonempty` is displayed. The details are consumed once on the callback thread; other dialog messages retain their original text. It changes neither requests nor entitlement.
 
 To reproduce, refresh the Suchi source in Morphe, patch the original Du Chinese 3.6.1 APK with **Show reading download errors** enabled, and reopen the failing premium reading. Share the dialog details with the developer.
 
@@ -64,9 +65,11 @@ An HTTP 401 or 403 warrants checking authorization, account entitlement and the 
 | `f5.j` | Response bytes unavailable; metadata may be absent |
 | `f5.u` | The network dispatcher wraps an unexpected exception with its cause, without attaching response metadata |
 
-On 2026-11-02, the user reported `f5.u`, no attached response and an immediate `java.lang.RuntimeException` cause. The original dispatcher `f5.i.d` catches unexpected exceptions across request execution, response parsing and cache handling. Its wrapper therefore does not prove that no response arrived. Evidence: `ev_ce8c923cd0b791786016d2e0ba8c819576f612b70d5fb98050f363cdf3dba043`.
+On 2026-11-02, the user reported `f5.u`, no attached response, an immediate `java.lang.RuntimeException` at `g5.l.e` / `g5.b.a`, and a nested `java.net.MalformedURLException` at `java.net.URL.<init>`. The original dispatcher `f5.i.d` catches unexpected exceptions across request execution, response parsing and cache handling; its generic wrapper alone would not identify which stage failed. The reported nested cause and locations identify URL construction on this path. Evidence: `ev_ce8c923cd0b791786016d2e0ba8c819576f612b70d5fb98050f363cdf3dba043`.
 
-One original branch, `g5.l.e`, wraps `MalformedURLException` in `RuntimeException` before the dispatcher wraps it again. This is a candidate explanation, not an observed device cause. The extended diagnostics can distinguish it using the nested cause and method location without exposing the request URL. Evidence: `ev_f32eca6a89076556e4389903d94e2ce1e9c7f9a34a3275455f9377e61e341143`.
+The original `g5.h.a` constructs `new URL(request.M())` before opening a connection or obtaining a response code. `g5.b.a` catches its I/O exception, and `g5.l.e` wraps `MalformedURLException` in the reported `RuntimeException`. This accounts for the unavailable HTTP status without establishing an authorization failure. Evidence: `ev_bd0da6addc12defd4708231100a0f481b78dcd47c25fcd59d8ced1372269f88d`, `ev_72ee2df8438f1e96e3246a5e6a5614f29632607812eb87710d1e63ab58b9a97b`, `ev_f32eca6a89076556e4389903d94e2ce1e9c7f9a34a3275455f9377e61e341143`.
+
+An omitted `ListDocument.crdUrl` defaults to null. `ec.J.v` puts that URL into reading navigation state, converting null to an empty string. The fragment's `S3` stores its supplied reading URL, and `y3` constructs the GET from that stored value. A missing URL is therefore a concrete candidate; the actual device URL has not been observed. The new presence indicator distinguishes empty from nonempty malformed values without displaying them. A nonempty result does not establish a valid URL. Evidence: `ev_5a368cd08b94ece914945780fe9163078ecaf64b68918744aadc5c9ec33dff18`, `ev_b2dcecef2839c04b5b52e1da3eb14a730964711ea5773a21488562ba368e0be8`, `ev_4b842a6ddd9aaeebe7ecb466969619ac6c5d905dec2f53af7025115bd039dd0c`, `ev_f9d8eeb34b2120fec22fe6eb7d5025fb2c53d083cfb0d270816a89da31a8fac2`.
 
 Invalid reading JSON uses the separate invalid-lesson dialog. The earlier `xb.a.c` downloader finding concerns audio and does not establish the reading-text failure.
 

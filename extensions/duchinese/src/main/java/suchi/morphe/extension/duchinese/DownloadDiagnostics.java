@@ -1,6 +1,7 @@
 package suchi.morphe.extension.duchinese;
 
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -60,8 +61,19 @@ public final class DownloadDiagnostics {
             }
             details.append(depth == 1 ? "\nCause: " : "\nCause " + depth + ": ")
                     .append(cause.getClass().getName());
+            appendRequestUrlState(details, cause);
             appendFrames(details, cause, "At: ");
             cause = causeOf(cause);
+        }
+    }
+
+    private static void appendRequestUrlState(StringBuilder details, Throwable error) {
+        if (error.getClass() != RuntimeException.class ||
+                !(causeOf(error) instanceof MalformedURLException)) return;
+        String message = error.getMessage();
+        if (message != null && message.startsWith("Bad URL ")) {
+            details.append("\nRequest URL: ")
+                    .append(message.length() == 8 ? "empty" : "nonempty");
         }
     }
 

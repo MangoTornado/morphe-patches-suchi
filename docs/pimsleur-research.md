@@ -40,6 +40,16 @@ This establishes a path from the local override to queued metadata and request c
 
 The separate `isMiniLessonAccessible` function (`7176`) still checks original all-access state or purchased products for the current language. It does not call either overridden selector. `getFullLessonProgress` (`15378`) uses `isPU` to select progress views and storage namespaces, while other user/product metadata readers remain independent. No statically named `getPremiumStatus` consumer was recovered beyond its export writes; indirect use remains unknown. Private analyst evidence: `PIM-APP-20261102-02`.
 
+## Lesson downloads and playback
+
+Further static tracing found that lesson downloads use original selected-product/all-access metadata and returned lesson media links independently of the two overridden selectors. `getCurrentAndSubUserIdFromState` (`15409`) supplies the original product flag to the metadata loader; normalization (`15415` / `15417`) carries it into the product model. The normalized `isPU` value is therefore not necessarily a raw server response flag.
+
+The download builder (`40685` / `40687`) copies supplied audio links and retains the original free-product lesson limit and practice-resource flag. Missing audio links skip resource creation. Empty metadata is not replaced with a course, and the inspected MainAudio mount and reload paths filter out lessons with empty audio links before building their playlists.
+
+The original downloader (`15427`) constructs a GET using the supplied URL. Its completion predicate (`15434`) requires HTTP 200 and checks MP3 length against `Content-Length`; failures retain the original retry, cleanup and pause behavior. Successful callbacks retain URL-to-local-path bookkeeping and queue persistence. Restore success independently requires a returned purchase record.
+
+These findings establish client construction and branches. Network transmission, backend entitlement, media availability and downstream empty-playlist behavior remain unobserved. Private analyst evidence `PIM-DOWNLOAD-20261102-01` through `-04`, with 24 verified supporting artifacts, is retained in `download-content-path-report.md` and `download-content-path-ledger.json` under `/private/tmp/pimsleur-research/`.
+
 ## Decoder provenance
 
 REA `6.7.0` has no advertised Hermes decoder. A cached `hermesc` reports HBC v98 and rejects the original v96 file; changing only a private inspection copy's version header also fails deserialization. Neither output was used as control-flow evidence.
