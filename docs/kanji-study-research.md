@@ -272,9 +272,10 @@ nor purchase behavior has been tested for a modified Kanji Study APK.
 Another recovery route is a controlled capture of the original signed app at
 its asset-decryption and DEX-loading boundaries. That requires a working test
 device and suitable debugging privileges and may encounter protector checks.
-It has not been performed. The local emulator fails before Android boots, and
-ADB setup is blocked by host socket restrictions, so neither supplies runtime
-evidence. No host restriction bypass was attempted.
+It has not been performed. The isolated Android emulator and loopback ADB now
+work outside the sandbox, but suitable debugging privileges and a capture at
+these protected boundaries have not been established. Other apps' startup
+tests do not supply runtime evidence for Kanji Study.
 
 Use free and entitled developer test accounts to compare upgrade, Guided Study,
 KLC and Outlier consumers and server responses. For MicroG, verify the actual

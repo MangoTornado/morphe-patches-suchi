@@ -28,7 +28,9 @@ These patches are experimental and disabled by default. Select them explicitly f
 
 Local overrides do not alter server account entitlements. MicroG routing targets `app.revanced.android.gms`; device login and notification delivery remain unverified. The reports describe each patch's scope and the remaining developer checks.
 
-See [validation results](docs/validation.md) for compilation, APK application checks and pending device tests.
+TEUIDA and Pimsleur crash after re-signing in offline startup tests; protection support is pending. Kanji Study has no patch yet.
+
+See [validation results](docs/validation.md) for builds, APK application checks and offline startup results.
 
 ## 🩹 Patches list
 
