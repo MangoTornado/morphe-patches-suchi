@@ -1,7 +1,8 @@
 # Kanji Study research
 
-Static inspection on 2026-11-02 using REA, JADX 0.7.1 and Hopper. The app was not
-executed and no service requests were sent.
+Inspection on 2026-11-02 using REA, JADX 0.7.1, Hopper and an isolated Android 35
+emulator. The original signed app was started for bounded offline checks.
+Guest networking was disabled, and no app account was used.
 
 ## Artifact
 
@@ -217,6 +218,13 @@ not classified here as a receipt, order identifier or purchase token. JADX's
 billing-loop rendering also requires raw DEX control-flow confirmation before
 any mutation is based on that method.
 
+The recovered `r13.o8` initializer passes selector `U+3717` to that decoder for
+the preference key stored in `r13.o`; `U+3718` supplies the enum name. Their
+plaintext remains unknown. A matching native `(String)String` descriptor alone
+does not identify this decoder: the inspected registration's class and method
+names remain encoded, and its candidate body formats JSON/Base64. No
+allowlisted decoder output is attributed to that candidate.
+
 Retained REA evidence:
 `ev_1afecdee899f9ec40fa188a53328f5a284aaaa9acbc6cf8b260e3c6751917b05`
 (`r13.b`),
@@ -270,12 +278,28 @@ and tested, or a developer test build that supports re-signing. Neither startup
 nor purchase behavior has been tested for a modified Kanji Study APK.
 
 Another recovery route is a controlled capture of the original signed app at
-its asset-decryption and DEX-loading boundaries. That requires a working test
-device and suitable debugging privileges and may encounter protector checks.
-It has not been performed. The isolated Android emulator and loopback ADB now
-work outside the sandbox, but suitable debugging privileges and a capture at
-these protected boundaries have not been established. Other apps' startup
-tests do not supply runtime evidence for Kanji Study.
+its asset-decryption and DEX-loading boundaries. An isolated stock AOSP Android
+35 guest now boots with verified root access and empty network routes. All
+three installed APKs match the original signed inputs.
+
+The first bounded native probe reached `JNI_OnLoad`, which returned `-500`;
+Android reported `UnsatisfiedLinkError: Bad JNI version`. It did not observe
+the string decoder's registration or recover any of the 47 selected constants.
+The same original app stayed alive for ten seconds without instrumentation on
+this guest, with no new package exception. This establishes a probe-associated
+failure, not a baseline startup failure or its precise cause. The probe changed
+the loader's in-memory entry instructions; observation outside the app's native
+code remains an alternative. App processes were stopped and the REA session
+detached after both checks. No protected-boundary capture or deployable patch
+has been established.
+
+A delayed attachment after normal startup failed in Frida's bootstrapper with
+`auxv-not-found`, before the guarded class-status or preference-key read ran.
+No plaintext key was recovered. A later original process had root-readable
+auxiliary-vector entries for its program headers and interpreter, but its final
+activity snapshot showed the launcher. That different process and state do not
+establish why the earlier target-side bootstrap failed. Both bounded processes
+were stopped; no app initializer or decoder was invoked by the delayed probe.
 
 Use free and entitled developer test accounts to compare upgrade, Guided Study,
 KLC and Outlier consumers and server responses. For MicroG, verify the actual
