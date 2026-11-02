@@ -1,6 +1,7 @@
 package suchi.morphe.extension.duchinese;
 
 import java.lang.reflect.Field;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -9,6 +10,10 @@ public final class DownloadDiagnostics {
     private static final ThreadLocal<String> FAILURE = new ThreadLocal<>();
     private static final Pattern MIME_TYPE =
             Pattern.compile("[a-zA-Z0-9!#$&^_.+-]+/[a-zA-Z0-9!#$&^_.+-]+");
+    private static final Pattern CLASS_NAME =
+            Pattern.compile("[a-zA-Z_$][a-zA-Z0-9_$]*(\\.[a-zA-Z_$][a-zA-Z0-9_$]*)*");
+    private static final Pattern METHOD_NAME =
+            Pattern.compile("[a-zA-Z_$][a-zA-Z0-9_$]*|<init>|<clinit>");
 
     private DownloadDiagnostics() {}
 
@@ -34,12 +39,61 @@ public final class DownloadDiagnostics {
             }
         }
         if (error instanceof Throwable) {
-            Throwable cause = ((Throwable) error).getCause();
-            if (cause != null) {
-                details.append("\nCause: ").append(cause.getClass().getName());
-            }
+            appendCauses(details, (Throwable) error);
         }
         FAILURE.set(details.toString());
+    }
+
+    private static void appendCauses(StringBuilder details, Throwable error) {
+        appendFrames(details, error, "Volley at: ");
+        IdentityHashMap<Throwable, Boolean> seen = new IdentityHashMap<>();
+        seen.put(error, Boolean.TRUE);
+        Throwable cause = causeOf(error);
+        for (int depth = 1; cause != null; depth++) {
+            if (seen.put(cause, Boolean.TRUE) != null) {
+                details.append("\nCause chain: cycle omitted");
+                return;
+            }
+            if (depth > 4) {
+                details.append("\nCause chain: additional causes omitted");
+                return;
+            }
+            details.append(depth == 1 ? "\nCause: " : "\nCause " + depth + ": ")
+                    .append(cause.getClass().getName());
+            appendFrames(details, cause, "At: ");
+            cause = causeOf(cause);
+        }
+    }
+
+    private static Throwable causeOf(Throwable error) {
+        try {
+            return error.getCause();
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private static void appendFrames(StringBuilder details, Throwable error, String label) {
+        StackTraceElement[] frames;
+        try {
+            frames = error.getStackTrace();
+        } catch (RuntimeException ignored) {
+            return;
+        }
+        if (frames == null) return;
+        int displayed = 0;
+        for (int i = 0; i < Math.min(frames.length, 16) && displayed < 3; i++) {
+            StackTraceElement frame = frames[i];
+            if (frame == null) continue;
+            String className = frame.getClassName();
+            String methodName = frame.getMethodName();
+            if (className.length() > 200 || methodName.length() > 100 ||
+                    !CLASS_NAME.matcher(className).matches() ||
+                    !METHOD_NAME.matcher(methodName).matches()) continue;
+            details.append('\n').append(label).append(className).append('.').append(methodName);
+            if (frame.getLineNumber() > 0) details.append(':').append(frame.getLineNumber());
+            displayed++;
+        }
     }
 
     public static CharSequence appendToMessage(CharSequence message, int resourceId) {

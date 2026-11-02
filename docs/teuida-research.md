@@ -18,6 +18,10 @@ The incoming trace identified 37 containing nodes for `UserShareds.l`, including
 
 The experimental, disabled-by-default **Enable local Premium controls** patch targets only version `1.23.0`. It makes these three getters return `true`, `Boolean.TRUE` and `PremiumState.PREMIUM`. It validates the two profile field references before mutation. The patch does not write profile fields, preferences, purchase receipts or server-side account entitlement.
 
+The getters also affect behavior outside UI gates. `ThirdPartySdkManager.b` reads `UserShareds.l()` when building AppsFlyer's login event property `user_type`, so enabling the local Premium patch changes that classification. This is a static data-flow finding, not an observed event transmission. Evidence: `ev_38c9de6a8ce799b68c2eb235c5c0b6aa0de5adf238c7fc688794bd67d1a38556`.
+
+`AmplitudeExtKt$setLoginInfo$1$1` reads the unchanged server `AmplitudeResponse` for its Identify properties. Its `MeData.t()` call instead gates a local FREE-to-non-FREE cache reconciliation; the Premium getter override suppresses that branch. The inspected RevenueCat login and customer-attribute builder still uses the original user ID, email, username and language fields without reading these Premium getters. Unchanged purchase/authentication source does not establish that every outgoing value is unchanged. Evidence: `ev_f7c5fba04201dd1836f7a859da79c28675cfcd0afc101807e5ab6701dee059d1`.
+
 `PremiumRepositoryImpl.h` sends a `SendPurchaseSubscriptionRequest` through `TeuidaAPI.V` with authentication headers. A separate backend purchase path therefore exists. Static inspection does not establish its validation rules, whether downloaded content has further checks, or the behavior of inconsistent trial, gift and expiry fields. Device testing with developer-provided free and entitled accounts is required.
 
 ## MicroG applicability

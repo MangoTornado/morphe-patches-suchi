@@ -21,7 +21,7 @@ The **Enable Pro menus** patch injects a helper after that cast. It changes exis
 
 Native login uses legacy Google Sign-In and Firebase Auth. Firebase messaging is used for notifications. **MicroG integration** routes selected external Google package, account, service and provider identifiers to `app.revanced.android.gms`, adds its package query and original signing-certificate metadata, and overrides the two availability methods. Internal Firebase actions, Binder interfaces, class names and Play Billing identifiers retain their original values. Evidence: `ev_be33297517bec972bf400ce4c4146d16d7b737e94cc4ff1303045f65f3be82bf`, `ev_9900c199a15a4f8c5b532c40ea72a056fa35e5683383d7458045d56e358f33a2`.
 
-The patch requires a compatible MicroG installation with package `app.revanced.android.gms`. Its availability override reports success, so it must be selected only for a device with that provider installed. Google sign-in, Firebase server acceptance and notification delivery remain untested on a device.
+The patch requires a compatible MicroG installation with package `app.revanced.android.gms`. Its availability override reports success, so it must be selected only for a device with that provider installed. On 2026-11-02, the user reported that renshuu works and MicroG sign-in succeeds on their device. Android and MicroG versions were not supplied; notification delivery, session persistence, account switching and billing remain unverified.
 
 ## Validation
 
@@ -29,7 +29,7 @@ Both patches are disabled by default and target only the inspected version, mark
 
 Offline checks compiled the patch sources with Kotlin 2.4.21 and Morphe Patcher 2.1.0. Pro-state and protocol-routing tests passed. Both patches applied to the original base APK and produced DEX and resources. SDK DEX verification found the same 176 optional-dependency hierarchy findings in the original and patched APK; no findings were added.
 
-The signed `.mpp` passed loader and signature checks, and the full Gradle build and tests passed. The patched base APK and supplied splits installed on an isolated Android 37 emulator; offline startup reached `LoginActivity` without a package crash. Authenticated menus, web features and MicroG remain pending developer checks. No live entitlement endpoint was called. See [validation results](validation.md).
+The signed `.mpp` passed loader and signature checks, and the full Gradle build and tests passed. The patched base APK and supplied splits installed on an isolated Android 37 emulator; offline startup reached `LoginActivity` without a package crash. The later user device report confirms startup and MicroG sign-in, but does not establish server-controlled premium access or complete the remaining developer checks. No live entitlement endpoint was called during the automated checks. See [validation results](validation.md).
 
 ## Developer verification
 
