@@ -23,7 +23,11 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
 }
 
-sourceSets["test"].java.srcDirs("../tests", "../extensions/renshuu/src/main/java")
+sourceSets["test"].java.srcDirs(
+    "../tests",
+    "../extensions/renshuu/src/main/java",
+    "../extensions/duchinese/src/main/java",
+)
 
 tasks {
     withType<JavaCompile>().configureEach {

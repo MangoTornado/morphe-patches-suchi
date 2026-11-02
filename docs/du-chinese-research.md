@@ -35,6 +35,34 @@ Analysis files are under `/private/tmp/du-chinese-research`: `base.apk`, `artifa
 
 **Unknown:** enforcement on lesson, audio and vocabulary endpoints, receipt validation results and account-level entitlement. No receipts were fabricated and no live endpoint was contacted. The patch alters neither stored billing data nor these response handlers.
 
+## Reading download diagnostics
+
+The reading-text request is a GET using the lesson's CRD URL. Its error callback, `MarqueeActivityFragment$d.a(f5.u)`, discards the Volley error and opens the generic download-failed dialog. The subscription and MicroG patches leave the inspected reading URL, request, credentials and parser unchanged. These static findings do not establish the failing device's HTTP status.
+
+The optional **Show reading download errors** patch adds these details to that dialog:
+
+- The actual Volley error class.
+- HTTP status when the error retains a network response.
+- Response byte count and MIME type, when available.
+- The immediate cause's class, when available.
+
+It excludes URLs, response contents, token values and exception messages. The details are consumed once on the callback thread; other dialog messages retain their original text. It changes neither requests nor entitlement.
+
+To reproduce, refresh the Suchi source in Morphe, patch the original Du Chinese 3.6.1 APK with **Show reading download errors** enabled, and reopen the failing premium reading. Share the dialog details with the developer.
+
+An HTTP 401 or 403 warrants checking authorization, account entitlement and the issued content URL. A missing attached response does not prove a transport failure: Volley can also discard response metadata while constructing another network error. The cause class can identify DNS, TLS or socket failures. Original error-construction branches provide these additional version-specific clues:
+
+| Error class | Observed construction |
+| --- | --- |
+| `f5.a` | HTTP 401/403 authentication error |
+| `f5.d` | Other HTTP 400–499 client error |
+| `f5.s` | Server or remaining HTTP error |
+| `f5.t` | Socket timeout |
+| `f5.l` | No HTTP response object; may retain an I/O cause |
+| `f5.j` | Response bytes unavailable; metadata may be absent |
+
+Invalid reading JSON uses the separate invalid-lesson dialog. The earlier `xb.a.c` downloader finding concerns audio and does not establish the reading-text failure.
+
 ## Google services and MicroG applicability
 
 The native login activity inspected builds an email/password form. The retained `GoogleSignInAccount` references belong to obfuscated Google library classes; they do not demonstrate an app login flow. Raw base-DEX class inventory contains none of the exact classes `GoogleSignInClient`, `GoogleSignInOptions`, `GetGoogleIdOption` or `androidx.credentials.CredentialOption`. An obfuscated or dynamic Google login path remains unproven. Evidence: `ev_69a4d068ec0938aac296556377964e9d58abe3c71a3e744aa66044cd5095b5ef`, `ev_dc9decd56b53fecd4f31708dddf020846faa1a7e9312916f4a15def50aed28f1`.
@@ -65,4 +93,6 @@ The patched base APK and supplied splits installed on an isolated Android 37 emu
 
 ## Validation
 
-The local-controls and MicroG patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX and resources. SDK DEX verification passed with no hierarchy findings. Protocol-routing tests also passed. The packaged `.mpp` passed loader checks; the full Gradle task graph and device behavior remain pending. See [validation results](validation.md).
+All three Du Chinese patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied together to the original base APK, and produced verified DEX and resources with no hierarchy findings. The Gradle build, seven JUnit tests and bundle loader checks passed.
+
+The diagnostics APK installed with the original supplied splits and reached `MainActivity` on an offline Android 35 emulator without a package crash. An Android test using the APK's real Volley classes verified synthetic HTTP 403 metadata, a DNS cause class, and the actual callback's null-fragment cleanup. These fixtures contacted no backend and do not identify the reported device failure. See [validation results](validation.md).

@@ -4,7 +4,7 @@ Validated on 2026-11-02 against the base APK hashes recorded in each app's resea
 
 ## Completed
 
-All patch sources and test sources compiled using cached Kotlin 2.4.21 and Morphe Patcher 2.1.0. Two JUnit checks passed:
+The initial bundle's patch sources and test sources compiled using cached Kotlin 2.4.21 and Morphe Patcher 2.1.0. Two JUnit checks passed:
 
 - Pro-state checks cover existing flags, guest and sparse data, null input, repeated application, and preservation of account and schedule data.
 - MicroG routing checks cover selected protocol identifiers, provider URI boundaries, manifest actions, and preservation of class/Binder descriptors, internal Firebase actions, Play Billing and unsupported service actions.
@@ -13,7 +13,7 @@ A fresh local `patches/build/libs/patches-1.0.0.mpp` was built through the docum
 
 Morphe Patcher 2.1.0 loaded the canonical bundle and found five named, disabled-by-default patches, including Pimsleur's raw-resource patch and four MicroG targets. The patch DEX contains 42 classes and the renshuu extension contains its `ProState` helper and generated Android `R` class, with no test, template or third-party app classes.
 
-The plugin signed the canonical bundle with Ed25519, storing its signature in the ZIP comment. Morphe Patcher verified its signer against `morphe-signing.pub` and rejected a copy with a changed byte. After adding startup warnings to the TEUIDA and Pimsleur version notes, the signed bundle is 89,240 bytes; SHA-256 `47b0bac663896ca7bba820deb988348319a8b76da4ac48fa8767655f094e7164`. The signing-key fingerprint is `898a 6e74 45aa eec8`. The private key is ignored by Git and backed up outside the repository with restricted file permissions; uploading it to the Actions secret remains pending.
+The plugin signed the initial canonical bundle with Ed25519, storing its signature in the ZIP comment. Morphe Patcher verified its signer against `morphe-signing.pub` and rejected a copy with a changed byte. After adding startup warnings to the TEUIDA and Pimsleur version notes, that local signed bundle is 89,240 bytes; SHA-256 `47b0bac663896ca7bba820deb988348319a8b76da4ac48fa8767655f094e7164`. The signing-key fingerprint is `898a 6e74 45aa eec8`. The private key is backed up outside the repository with restricted file permissions and configured in the Actions secret; the ignored repository copy was deleted.
 
 The existing `generatePatchesList` task produced a valid patch list: five named patches, all disabled by default, and four MicroG targets. Generated release files and the README's generated section remain reserved for `release.yml`. CI now runs tests before semantic release and requires the signing public key and Actions secret. The pinned Morphe changelog plugin's inspected source confirms that it publishes the public key as `public_key` in `patches-bundle.json`; the detached signature URL remains empty for this inline-signature format.
 
@@ -35,6 +35,16 @@ Compiled manifest checks confirmed the MicroG package query, receiver action and
 Pimsleur's actual patcher output changed 128 bytes, confined to the two selector bodies and SHA-1 footer. The 37,658 other distinct function bodies, all headers and all tables remained unchanged; both replacements decoded correctly and the footer verified. Its asset SHA-256 matched `30a659353cf17666a027c038ea47262427ede69c2d15992ceebcc561379a7cb4`. A separate actual patcher run rejected a changed Hermes bundle of the same app version before mutation. The modified asset is exported in `other-resources/assets/index.android.bundle` alongside compiled resources for APK assembly.
 
 Local validation scripts, compiler output, patch application logs and extracted artifacts are retained under `/private/tmp/renshuu-research/`, `/private/tmp/teuida-research/`, `/private/tmp/pimsleur-research/`, `/private/tmp/suchi-gradle-unblock/final-checks/` and `/private/tmp/suchi-release-audit/`. These private files are not part of the public repository.
+
+### Du Chinese download diagnostics
+
+The optional diagnostics patch adds a third Du Chinese patch, bringing the bundle to six named patches and nine app compatibility entries. It remains disabled by default and targets only version 3.6.1. The bundle loader verifies 48 patch DEX classes and two classes in each extension, with no tests or third-party app classes included.
+
+The current Gradle Android build and all seven JUnit tests passed. The five diagnostics tests cover HTTP metadata, cause classes, exclusion of private contents and messages, missing fields, malformed MIME types, one-time consumption, explicit cleanup, resource gating and thread isolation.
+
+All three Du Chinese patches applied together to the preserved original APK. SDK verification and cross-DEX hierarchy checks passed for 25,113 classes, with no findings. The re-signed APK and supplied splits installed on the isolated offline Android 35 guest and reached `MainActivity`, remaining alive for ten seconds without a package crash.
+
+An Android runtime harness loaded the actual patched APK and its Volley classes. Synthetic HTTP 403 and DNS-error fixtures produced the expected class, status and cause metadata while excluding fixture contents and exception messages. Invoking the actual error callback with an empty fragment reference verified that its branch runs diagnostic cleanup before returning. These are controlled fixtures, not the failing device's network response. No backend or account was contacted. Reports are retained under `/private/tmp/du-chinese-download-diagnostics/`.
 
 ## Pending
 
@@ -68,13 +78,4 @@ Patch compatibility checks package and version name. Pimsleur's Premium patch ad
 
 Kanji Study's protected records and secondary DEX were recovered for inspection. Its report identifies a local upgrade preference, purchase and feature consumers, server-response checks, and an active Drive OAuth2 path. Those methods remain outside the original base DEX, and re-signing changes inputs to the protector's authenticated key derivation. A deployable patch requires reconstructing protected-record rewriting and loader integration, or a developer build that supports test signing. No Kanji Study patch is included.
 
-GitHub authentication, fetch and the normal `dev` push now work outside the sandbox. The template's `main` and `dev` initially had unrelated histories, causing the PR workflow's comparison to fail. A merge on `dev` connects those histories while preserving the tracked tree. Fresh CI at `3b2fd20` passed dependency setup and tests, then stopped at the missing signing secret. The PR workflow now reaches creation and stops at the disabled Actions pull-request permission. These two repository settings remain pending. The remaining configuration and publication steps are:
-
-```sh
-gh secret set MORPHE_SIGNING_KEY --repo MangoTornado/morphe-patches-suchi < morphe-signing.key
-gh api -X PUT repos/MangoTornado/morphe-patches-suchi/actions/permissions/workflow \
-  -F can_approve_pull_request_reviews=true
-git push origin dev
-```
-
-After confirming the secret was uploaded, keep the private backup and delete the ignored repository key. A `feat:` or `fix:` commit lets the existing workflow publish a signed development release, generate `patches-list.json` and `patches-bundle.json`, and update the README patch list. Development releases require enabling pre-release in Morphe Manager. Merge `dev` into `main` without squashing for a stable release.
+Repository setup is complete: GitHub access, the signing secret and Actions pull-request permission are configured, and the signed `v1.0.0` stable release was published and anonymously verified. The existing workflow clears test build outputs before release so that only the signed Android bundle is uploaded. A `feat:` or `fix:` commit publishes a development release and regenerates the metadata and README patch list. Development releases require enabling pre-release in Morphe Manager. Merge `dev` into `main` without squashing for a stable release.
