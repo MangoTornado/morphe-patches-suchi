@@ -16,6 +16,8 @@ The current deployable-patch limitations are:
 - Pimsleur: follow the recovered Hermes selectors into concrete feature consumers and distinguish local UI gates from content supplied by the server.
 - Kanji Study: use the recovered protected records, secondary DEX and member mappings to trace preference names, local feature consumers and the active Google account/token path.
 
+Completed follow-up traces connect Pimsleur's local selector to constructed progress metadata, TEUIDA's getters to analytics and gift/trial branches, and Kanji Study's six product preferences to local consumers and its account/token route. The app reports retain exact evidence and distinguish constructed values from observed network behavior.
+
 Recovered data and static branch traces establish research coverage. A working modified APK still requires successful loader integration and startup validation.
 
 ## Optional developer inputs

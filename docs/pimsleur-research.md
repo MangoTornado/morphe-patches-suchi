@@ -32,6 +32,14 @@ Decoded function `18183` creates a `@@purchase/verifyReceiptViaBackend` action u
 
 These are recovered request definitions and platform branches. No request was sent, no receipt was forged, and backend acceptance rules or download controls were not observed. Google Play Billing, Nitro IAP and OpenIAP are packaged; native `NativeLoginModule.exchangeTokens` also uses Auth0. A developer-controlled free/entitled account comparison is still needed to establish behavior after the local selectors change.
 
+## Additional selector effects
+
+Static tracing connects `isPU` to metadata beyond presentation. Function `16020` captures its result; `16021` stores it as `premium` in a new queued learning-streak record. Functions `16026` and `16027` read the queue and copy that field into `learningStreakRequests`. The original request builder `10753`, file offset `3867716`, constructs `POST /sync-learning-streak/cumulate-learn-time` from those records. Existing queued records retain their earlier `premium` value when learning time is added.
+
+This establishes a path from the local override to queued metadata and request construction. Scheduler execution, network transmission and backend acceptance were not observed. The inspected receipt and Auth0 token builders retain their original input sources; unchanged builder instructions do not establish unchanged values for every outgoing payload. Private analyst evidence: `PIM-APP-20261102-01` and `PIM-APP-20261102-03`.
+
+The separate `isMiniLessonAccessible` function (`7176`) still checks original all-access state or purchased products for the current language. It does not call either overridden selector. `getFullLessonProgress` (`15378`) uses `isPU` to select progress views and storage namespaces, while other user/product metadata readers remain independent. No statically named `getPremiumStatus` consumer was recovered beyond its export writes; indirect use remains unknown. Private analyst evidence: `PIM-APP-20261102-02`.
+
 ## Decoder provenance
 
 REA `6.7.0` has no advertised Hermes decoder. A cached `hermesc` reports HBC v98 and rejects the original v96 file; changing only a private inspection copy's version header also fails deserialization. Neither output was used as control-flow evidence.
@@ -55,6 +63,8 @@ A second patcher run rejected a changed Hermes asset with the same app version b
 ## Evidence
 
 Canonical REA records are exported locally at `/private/tmp/pimsleur-research/evidence.json`. Hermes findings are supplemental analyst decoding, separate from those records: `hermes-v96-tables.json`, `hermes-v96-decode-summary.json`, `hermes-v96-string-references.json`, `hermes-v96-selected-functions.txt`, `hermes-v96-backend-and-gate-functions.json` and `hermes-v96-premium-verification.json` in the same directory. Primary reference provenance is in the workspace `.research-tools/hermes-v96-source-references.json`.
+
+The app-level follow-up is retained privately in `app-level-findings.md` and its referenced instruction, object-template and request-builder records. The `PIM-APP-20261102-*` identifiers label analyst evidence, not REA records. No source map or developer test build was used.
 
 | Observation | REA evidence ID |
 | --- | --- |
