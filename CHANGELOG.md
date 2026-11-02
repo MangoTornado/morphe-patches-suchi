@@ -1,3 +1,9 @@
+## [1.1.3](https://github.com/[secure]/morphe-patches-suchi/compare/v1.1.2...v1.1.3) (2026-11-02)
+
+### 🐛 Bug Fixes
+
+* Report Du Chinese lesson URL observations ([fb0e998](https://github.com/[secure]/morphe-patches-suchi/commit/fb0e998b893611f200ffd5b7fb149a78bbc4ce5a))
+
 ## [1.1.3-dev.1](https://github.com/[secure]/morphe-patches-suchi/compare/v1.1.2...v1.1.3-dev.1) (2026-11-02)
 
 ### 🐛 Bug Fixes
