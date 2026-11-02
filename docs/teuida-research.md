@@ -1,6 +1,6 @@
 # TEUIDA static research
 
-Inspected on 2026-11-02 with REA and its JADX provider, reported version `0.7.1`. The original workspace archive was preserved. Its extracted base APK passed signature verification during output checks; publisher identity, split APK behavior, native libraries, device behavior and backend enforcement were not verified.
+Inspected on 2026-11-02 with REA and its JADX provider, reported version `0.7.1`. The original workspace archive was preserved. Its extracted base APK passed signature verification during output checks; publisher identity and backend enforcement remain unverified. Offline split-APK startup and Pairip protection checks are recorded in [validation results](validation.md).
 
 | Artifact | Value |
 | --- | --- |
@@ -36,7 +36,7 @@ The combined local Premium + MicroG candidate compiled with Kotlin 2.4.21 and Mo
 
 ## Evidence
 
-Canonical records are exported locally at `/private/tmp/teuida-research/evidence.json`; the base APK and identity file are in that directory. No app account, live purchase service or device runtime was used for this investigation.
+Canonical records are exported locally at `/private/tmp/teuida-research/evidence.json`; the base APK and identity file are in that directory. No app account or live purchase service was used. The later offline emulator checks are recorded separately in [validation results](validation.md).
 
 | Observation | REA evidence ID |
 | --- | --- |

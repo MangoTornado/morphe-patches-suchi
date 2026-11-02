@@ -50,7 +50,7 @@ The shared **MicroG integration** patch targets only inspected version `8.1`, ma
 
 The combined local Premium + MicroG patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX, compiled resources and the modified Hermes asset. SDK DEX verification found the same 58 optional-dependency hierarchy findings in the original and patched APK; no findings were added. Protocol-routing and compiled manifest checks passed. The raw asset is exported as `other-resources/assets/index.android.bundle` for APK assembly, separately from `resources.apk`.
 
-A second patcher run rejected a changed Hermes asset with the same app version before mutation. The packaged `.mpp` passed loader checks; the full Gradle task graph and device testing remain pending. See [validation results](validation.md).
+A second patcher run rejected a changed Hermes asset with the same app version before mutation. The signed `.mpp` passed loader and signature checks, and the full Gradle build and tests passed. Split-APK startup checks reached a native Pairip protection boundary; see [validation results](validation.md) for the original and re-signed controls. Paid feature behavior remains unverified.
 
 ## Evidence
 

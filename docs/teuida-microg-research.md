@@ -1,6 +1,6 @@
 # TEUIDA Credential Manager / MicroG research
 
-Static inspection on 2026-11-02 found that package/action routing, original signer metadata, and a Play Services availability override do **not** cover TEUIDA's complete Google sign-in flow. The experimental, disabled-by-default **MicroG integration** candidate now includes TEUIDA `1.23.0` with additional credential hooks. No APK was executed, account used, or service contacted; device sign-in remains unverified.
+Static inspection on 2026-11-02 found that package/action routing, original signer metadata, and a Play Services availability override do **not** cover TEUIDA's complete Google sign-in flow. The experimental, disabled-by-default **MicroG integration** candidate now includes TEUIDA `1.23.0` with additional credential hooks. Offline emulator startup checks are recorded in [validation results](validation.md). Account-based sign-in and notification delivery remain unverified.
 
 ## Inspected inputs
 

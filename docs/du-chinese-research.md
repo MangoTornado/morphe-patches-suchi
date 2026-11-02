@@ -1,6 +1,6 @@
 # Du Chinese 3.6.1 research
 
-Static inspection on 2026-11-02 found a local subscription preference and lesson-opening checks. The experimental patch changes the subscription getter and one confirmed next-lesson navigation check. A separate patch redirects native Google service references to MicroG. Server subscriptions, protected downloads and device behavior have not been verified.
+Static inspection on 2026-11-02 found a local subscription preference and lesson-opening checks. The experimental patch changes the subscription getter and one confirmed next-lesson navigation check. A separate patch redirects native Google service references to MicroG. Offline emulator startup passed; server subscriptions, protected downloads and authenticated device behavior remain unverified.
 
 ## Artifact
 
@@ -14,7 +14,7 @@ Static inspection on 2026-11-02 found a local subscription preference and lesson
 | SDK | Minimum 21; target 36 |
 | Splits | ABI `arm64_v8a`; locales `en`, `ja`, `zh`; density `xxxhdpi` |
 
-Analysis files are under `/private/tmp/du-chinese-research`: `base.apk`, `artifact-identity.json`, `AndroidManifest.xml`, `dex-inventory.json`, `google-strings.txt` and `android-evidence.json`. REA used JADX headless 0.7.1 with JDK 21.0.12.1. The APK was not executed. APK signature verification passed during output checks; publisher identity was not independently verified. Package evidence: `ev_9e54222cb8215647c74ff8de22c1bbf09dbaed2a65b3c513eba52313cb2d929d`.
+Analysis files are under `/private/tmp/du-chinese-research`: `base.apk`, `artifact-identity.json`, `AndroidManifest.xml`, `dex-inventory.json`, `google-strings.txt` and `android-evidence.json`. REA used JADX headless 0.7.1 with JDK 21.0.12.1. APK signature verification passed during output checks; publisher identity was not independently verified. Package evidence: `ev_9e54222cb8215647c74ff8de22c1bbf09dbaed2a65b3c513eba52313cb2d929d`.
 
 ## Observed local checks
 
@@ -61,7 +61,7 @@ The base DEX contains these external service-action constants:
 
 The shared **MicroG integration** patch includes these exact obfuscated availability methods. It redirects selected external package, account, service and provider identifiers to `app.revanced.android.gms`, adds a package query and original signer metadata, and makes both availability checks return success. Class/Binder descriptors, app-local provider authorities, internal Firebase actions and Play Billing routing retain their original values. The unsupported or unverified service actions above also remain unchanged.
 
-The patch requires the matching MicroG provider to be installed. FCM delivery, account registration, installation with the supplied splits and all runtime behavior remain unverified.
+The patched base APK and supplied splits installed on an isolated Android 37 emulator and reached onboarding/`MainActivity` offline without a package crash. The patch requires the matching MicroG provider for Google services; FCM delivery, account registration and paid feature behavior remain unverified. See [validation results](validation.md).
 
 ## Validation
 

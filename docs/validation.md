@@ -1,6 +1,6 @@
 # Research patch validation
 
-Validated on 2026-11-02 against the base APK hashes recorded in each app's research report. Original workspace archives were preserved. No patched APK was installed and no live purchase or entitlement endpoint was contacted.
+Validated on 2026-11-02 against the base APK hashes recorded in each app's research report. Original workspace archives were preserved. Patched APK sets were installed on an isolated Android 37 emulator for offline startup checks. Guest networking was disabled, and no app account or live purchase/entitlement endpoint was used.
 
 ## Completed
 
@@ -9,11 +9,11 @@ All patch sources and test sources compiled using cached Kotlin 2.4.21 and Morph
 - Pro-state checks cover existing flags, guest and sparse data, null input, repeated application, and preservation of account and schedule data.
 - MicroG routing checks cover selected protocol identifiers, provider URI boundaries, manifest actions, and preservation of class/Binder descriptors, internal Firebase actions, Play Billing and unsupported service actions.
 
-A fresh local `patches/build/libs/patches-1.0.0.mpp` was built through the documented Gradle task graph with Java 21, Kotlin 2.4.21 and Morphe plugin 2.1.0. `buildAndroid`, `:patches:test` and `generatePatchesList` passed, with two tests and no failures or skips. Java compilation explicitly targets release 17. The Java-only renshuu extension excludes the unused Kotlin runtime.
+A fresh local `patches/build/libs/patches-1.0.0.mpp` was built through the documented Gradle task graph with Java 21, Kotlin 2.4.21 and Morphe plugin 2.1.0. A clean build of `buildAndroid`, `:patches:test` and `generatePatchesList` passed, with two tests and no failures or skips. Java and Kotlin compilation explicitly target release 17; this also corrects the Java 17/Kotlin 11 mismatch exposed by fresh CI. The Java-only renshuu extension excludes the unused Kotlin runtime.
 
 Morphe Patcher 2.1.0 loaded the canonical bundle and found five named, disabled-by-default patches, including Pimsleur's raw-resource patch and four MicroG targets. The patch DEX contains 42 classes and the renshuu extension contains its `ProState` helper and generated Android `R` class, with no test, template or third-party app classes.
 
-The plugin signed the canonical bundle with Ed25519, storing its signature in the ZIP comment. Morphe Patcher verified its signer against `morphe-signing.pub` and rejected a copy with a changed byte. The signed bundle is 88,971 bytes; SHA-256 `76a6bb17c658708609670a051e7e51d115ba3533041a076be0e96fc586d7aded`. The signing-key fingerprint is `898a 6e74 45aa eec8`. The private key is ignored by Git and backed up outside the repository with restricted file permissions; uploading it to the Actions secret remains pending.
+The plugin signed the canonical bundle with Ed25519, storing its signature in the ZIP comment. Morphe Patcher verified its signer against `morphe-signing.pub` and rejected a copy with a changed byte. The signed bundle is 88,979 bytes; SHA-256 `098acca31534f8163fa1819dcbc42e30dea92d67c7915756f645a0e3f90a4557`. The signing-key fingerprint is `898a 6e74 45aa eec8`. The private key is ignored by Git and backed up outside the repository with restricted file permissions; uploading it to the Actions secret remains pending.
 
 The existing `generatePatchesList` task produced a valid patch list: five named patches, all disabled by default, and four MicroG targets. Generated release files and the README's generated section remain reserved for `release.yml`. CI now runs tests before semantic release and requires the signing public key and Actions secret. The pinned Morphe changelog plugin's inspected source confirms that it publishes the public key as `public_key` in `patches-bundle.json`; the detached signature URL remains empty for this inline-signature format.
 
@@ -38,7 +38,11 @@ Local validation scripts, compiler output, patch application logs and extracted 
 
 ## Pending
 
-Installed AVDs were found in `~/.android/avd/`, with the emulator and ARM64 system images in `~/Library/Android/sdk/`. An isolated test AVD preserved the original AVD data. The sandboxed attempt exited before boot with `SIGILL` in `init_cache_info`; the recorded instruction is `mrs x9, CTR_EL0`. Static inspection connected that fallback to a denied `hw.cachelinesize` query. After execution outside the sandbox was enabled, the query returned 128, Android booted, and an isolated loopback ADB server connected successfully. Emulator and ADB listeners were checked to remain on loopback. The original failure evidence is retained in `/private/tmp/suchi-emulator-investigation/investigation.json`; the successful boot and listener checks are under `/private/tmp/suchi-emulator/`. App smoke checks remain pending.
+Installed AVDs were found in `~/.android/avd/`, with the emulator and ARM64 system images in `~/Library/Android/sdk/`. An isolated test AVD preserved the original AVD data. The sandboxed attempt exited before boot with `SIGILL` in `init_cache_info`; the recorded instruction is `mrs x9, CTR_EL0`. Static inspection connected that fallback to a denied `hw.cachelinesize` query. After execution outside the sandbox was enabled, the query returned 128, Android booted, and an isolated loopback ADB server connected successfully. Emulator and ADB listeners were checked to remain on loopback. The original failure evidence is retained in `/private/tmp/suchi-emulator-investigation/investigation.json`; the successful boot and listener checks are under `/private/tmp/suchi-emulator/`.
+
+All four patched APK sets installed with their original splits, re-signed consistently using a separate private research APK key. renshuu reached `LoginActivity` and Du Chinese reached onboarding/`MainActivity`; both remained alive without a package crash-buffer entry. These are startup observations, not verification of paid features, authenticated services or MicroG.
+
+TEUIDA and Pimsleur require further protection checks. Their modified/re-signed copies crashed in `libpairipcore.so`; TEUIDA also redirected to Play's licence paywall. The original-signed TEUIDA baseline redirected and terminated offline without that native crash. Original and unchanged re-signed controls are being compared to distinguish licensing conditions, signer enforcement and patch effects. A missing MicroG installation alone does not explain the observed TEUIDA paywall URI.
 
 Device checks require the original splits, a compatible `app.revanced.android.gms` installation for the four MicroG targets, and developer-provided test accounts. Verify startup, local feature behavior, server-controlled content, login, cancellation, sign-out, FCM registration/delivery, and billing purchase/restore behavior. Static local overrides do not establish server entitlement or content access.
 
@@ -46,7 +50,7 @@ Patch compatibility checks package and version name. Pimsleur's Premium patch ad
 
 Kanji Study's protected records and secondary DEX were recovered for inspection. Its report identifies a local upgrade preference, purchase and feature consumers, server-response checks, and an active Drive OAuth2 path. Those methods remain outside the original base DEX, and re-signing changes inputs to the protector's authenticated key derivation. A deployable patch requires reconstructing protected-record rewriting and loader integration, or a developer build that supports test signing. No Kanji Study patch is included.
 
-GitHub authentication and fetch now work outside the sandbox. The repository currently has no signing secret, and Actions pull-request approval is disabled. Uploading the newly generated private key and enabling that setting are awaiting explicit approval after automatic approval review rejected those changes. The remaining configuration and publication steps are:
+GitHub authentication, fetch and the normal `dev` push now work outside the sandbox. The template's `main` and `dev` initially had unrelated histories, causing the PR workflow's comparison to fail. A merge on `dev` connects those histories while preserving the tracked tree. The repository's signing secret and Actions pull-request approval setting remain pending. The remaining configuration and publication steps are:
 
 ```sh
 gh secret set MORPHE_SIGNING_KEY --repo MangoTornado/morphe-patches-suchi < morphe-signing.key
