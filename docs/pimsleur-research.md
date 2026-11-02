@@ -70,6 +70,14 @@ The inspected Android Facebook login branch separately constructs original Faceb
 
 The shared **MicroG integration** patch targets only inspected version `8.1`, marked experimental and disabled by default. It redirects selected native external Google package, account, service and provider identifiers to `app.revanced.android.gms`, adds its package query and original signer metadata, and makes both availability methods return success. It leaves the Hermes bundle, class/Binder descriptors, internal Firebase actions and Play Billing routing unchanged. A matching MicroG installation is required. This native routing does not establish JavaScript compatibility, successful login or notification delivery.
 
+## SDK callback reconstruction
+
+A private source-derived candidate reconstructs Credentials 1.3.0 `HiddenActivity.onCreate(Bundle)` with new success and failure listeners. It uses retained public fields, SDK interfaces and synthetic helpers without guessing the existing optimized listener IDs. An independent audit validated 64 member/access checks, including all 41 helper calls used by the candidate. The published Google Maven binary independently confirms callback null-check ordering, retry classification and failure handling.
+
+The candidate passes 167 differential cases against the published Kotlin source in a neutral Android 17/API 37 instrumentation APK with 4 KB pages. Cases cover all four request types, saved-state gates, request and Activity identity, default/custom request codes, deferred receiver changes, listener chaining, null inputs, retry-policy changes and exception/result payloads. Only package and lifecycle-fixture substitutions change the reference source; its method bodies remain intact. The method wrapper and three support classes also pass independent DEX checks, with a separate API 24 support build.
+
+SDK services, tasks and lifecycle calls are fixtures; no real account, service or protected app is executed. API 24 has packaging checks only. Null-pointer diagnostic text and stack identity are not asserted. This candidate does not establish protected VM equivalence, SDK initialization or modified app startup and is not included in the public bundle. Verified sources, public binary evidence and test reports are retained privately under `.research-tools/artifacts/pimsleur-hiddenactivity-2026-11-02/`; temporary emulator data, signing keys and listeners were removed.
+
 ## Validation
 
 The combined local Premium + MicroG patches compiled with Kotlin 2.4.21 and Morphe Patcher 2.1.0, applied to the original base APK, and produced patched DEX, compiled resources and the modified Hermes asset. SDK DEX verification found the same 58 optional-dependency hierarchy findings in the original and patched APK; no findings were added. Protocol-routing and compiled manifest checks passed. The raw asset is exported as `other-resources/assets/index.android.bundle` for APK assembly, separately from `resources.apk`.
